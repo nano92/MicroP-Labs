@@ -15,10 +15,15 @@ int FIR_C(float* InputArray, float* OutputArray, FIR_coeff* coeff, int Length, i
 	return 0;
 }
 
-
+float sumArray(float* InputArray, FIR_coeff* coeff, int Order) {
+	float sum = 0;
+	for(int j = Order; j>=0; j--) {
+		sum = sum + InputArray[j]*coeff->b[j];
+	}		
+	return sum;
+}
 
 int main()
 {
-	
 	return 0;
 }
