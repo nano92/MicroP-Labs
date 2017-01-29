@@ -21,13 +21,22 @@ int FIR_C(float* InputArray, float* OutputArray, FIR_coeff* coeff, int Length, i
 	return 0;
 }
 
-
+float sumArray(float* InputArray, FIR_coeff* coeff, int Order, int Location) {
+	float sum = 0;
+	for(int j = Order; j>=0; j--) {
+		sum = sum + InputArray[Location-j]*coeff->b[j];
+	}		
+	return sum;
+}
 
 int main()
 {
+<<<<<<< HEAD
 	FIR_coeff coeff;
 	
 	coeff.b[] = {0.1, 0.15, 0.5, 0.15, 0.1};
 	
+=======
+>>>>>>> d0bc1661cb9bf0305ed8391c329934b1736b707d
 	return 0;
 }
