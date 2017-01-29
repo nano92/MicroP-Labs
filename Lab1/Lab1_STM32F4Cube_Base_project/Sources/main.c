@@ -31,12 +31,11 @@ float sumArray(float* InputArray, FIR_coeff* coeff, int Order, int Location) {
 
 int main()
 {
-<<<<<<< HEAD
+
 	FIR_coeff coeff;
 	
 	coeff.b[] = {0.1, 0.15, 0.5, 0.15, 0.1};
 	
-=======
->>>>>>> d0bc1661cb9bf0305ed8391c329934b1736b707d
+
 	return 0;
 }
