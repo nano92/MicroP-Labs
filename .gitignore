@@ -3,3 +3,4 @@
 
 Lab1/Lab1_STM32F4Cube_Base_project/*
 !Lab1/Lab1_STM32F4Cube_Base_project/Sources
+!Lab1/Lab1_STM32F4Cube_Base_project/Headers

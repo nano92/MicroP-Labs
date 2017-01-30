@@ -1,33 +1,33 @@
 #include <stdio.h>
-#include "arm_math.h"
+#include "main.h"
 
-float Sum_Array(float* InputArray, float* FIR_coeff, int Order, int Location) {
-	float sum = 0;
-	for(int j = Order; j >= 0; j--) {
+
+float32_t Window_Sum(float32_t* InputArray, float32_t* FIR_coeff, uint32_t Order, uint32_t Location){
+	float32_t sum = 0;
+	for(uint32_t j = Order; j >= 0; j--) {
 		sum = sum + InputArray[Location - j] * (FIR_coeff[j]);
 	}		
 	return sum;
 }
 
-int FIR_C(float* InputArray, float* OutputArray, float* FIR_coeff, int Length, int Order){
+int32_t FIR_C(float32_t* InputArray, float32_t* OutputArray, float32_t* FIR_coeff, uint32_t Length, uint32_t Order){
 		
-	for(int i = Length - 1; i >= Order; i--){
-		OutputArray[i] = Sum_Array(InputArray, FIR_coeff, Order, i);
+	for(uint32_t i = Length - 1; i >= Order; i--){
+		OutputArray[i] = Window_Sum(InputArray, FIR_coeff, Order, i);
 	}
 		
 	return 0;
 }
 
-int FIR_CMSIS(float* InputArray, float* OutputArray, float* FIR_coeff, int Length, int Order){
+int32_t FIR_CMSIS(float32_t* InputArray, float32_t* OutputArray, float32_t* FIR_coeff, uint32_t Length, uint32_t Order){
+	
 	arm_fir_instance_f32 S;
 	
-	return 0;
-}
-
-int main()
-{
-	float FIR_coeff[5] = {0.1, 0.15, 0.5, 0.15, 0.1};	
+	float32_t FIR_state[Length + Order];
 	
-
+	arm_fir_init_f32(&S, Order, &FIR_coeff[0], &FIR_state[0], Length);
+	
+	arm_fir_f32(&S, InputArray, OutputArray, Length);
+	
 	return 0;
 }
