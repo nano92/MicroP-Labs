@@ -28,9 +28,9 @@ int32_t FIR_CMSIS(float32_t* InputArray, float32_t* OutputArray, float32_t* FIR_
 	
 	arm_fir_instance_f32 S;
 	
-	float32_t FIR_state[Length + Order];
+	float32_t FIR_state[Length + Order - 1];
 	
-	arm_fir_init_f32(&S, Order, FIR_coeff, FIR_state, Length);
+	arm_fir_init_f32(&S, Order, &FIR_coeff[0], &FIR_state[0], Length);
 	
 	arm_fir_f32(&S, InputArray, OutputArray, Length);
 	
@@ -45,7 +45,7 @@ int32_t testbench()
 	float32_t InputArray[10]; //= {0.5, 0.9, 0.34, 0.69, 0.34, 0.12, 0.89};
 	float32_t OutputArray_ASM[10];
 	float32_t OutputArray_C[10];
-	float32_t OutputArray_CMSIS[100];
+	float32_t OutputArray_CMSIS[10];
 	for(int32_t i = 0; i < 10; i++){
 		InputArray[i] = (float)sin((double)i);
 		//printf("InputArray[%d] = %.4f\n", i, InputArray[i]);
@@ -61,14 +61,13 @@ int32_t testbench()
 	FIR_ASM(InputArray, OutputArray_ASM, FIR_coeff, 10, 4);
 	
 	FIR_C(InputArray, OutputArray_C, FIR_coeff, 10, 4);
-	//FIR_CMSIS(InputArray, OutputArray_CMSIS, FIR_coeff, 10, 4);
+	FIR_CMSIS(InputArray, OutputArray_CMSIS, FIR_coeff, 10, 5);
 	
 	for(int i = 0; i < 10; i++){
-		printf("OA_C[%d] = %.4f\tOA_ASM[%d] = %.4f\tOA_CMSIS[%d] = %.4f\n", i, OutputArray_C[i], i, OutputArray_ASM[i], i, OutputArray_CMSIS[i]);
+		printf("OA_C[%d] = %.4f\tOA_ASM[%d] = %.4f\tOA_CMSIS[%d] = %.4f\n", 
+			i, OutputArray_C[i], i, OutputArray_ASM[i], i, OutputArray_CMSIS[i]);
 	}
-	
-	
-	
+
 	return 0;
 }
 
