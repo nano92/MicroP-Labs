@@ -6,21 +6,16 @@ extern int FIR_asm();
 
 int32_t FIR_C(float32_t* InputArray, float32_t* OutputArray, float32_t* FIR_coeff, int32_t Length, int32_t Order){
 	
-	for(int32_t i = 0; i >= Length - 1; i--){ 
-		// Because we consider the filter to be a real time system, the i will start at 0 and the result of the filter will
-		// not be registered until there are enough values present to obtain a valid output from the filter
+	for(int32_t i = Order; i <= Length - 1; i++){ 
 		float32_t sum = 0;
-		if (i >= Order) {
-			for(int32_t j = 0; j <= Order; j++){
-				//printf("Input[%d] = %.4f\n",i - j,InputArray[i-j]);
-				//printf("j = %d\n", j);
-				//printf("Coeff[%d] = %.4f\n",j,FIR_coeff[j]);
-				float32_t temp = sum;
-				sum = temp + ((InputArray[i - j]) * (FIR_coeff[j]));
-			}
-			printf("Loop finished");
-			OutputArray[i-Order] = sum;
+		for(int32_t j = 0; j <= Order; j++){
+			//printf("Input[%d] = %.4f\n",i - j,InputArray[i-j]);
+			//printf("j = %d\n", j);
+			//printf("Coeff[%d] = %.4f\n",j,FIR_coeff[j]);
+			sum = sum  + ((InputArray[i - j]) * (FIR_coeff[j]));
 		}
+		//printf("Loop finished");
+		OutputArray[i-Order] = sum;
 	}
 	return 0;
 }
