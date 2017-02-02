@@ -41,27 +41,31 @@ int32_t testbench()
 {	
 	srand(time(NULL));
 	
-	float32_t FIR_coeff[5] = {0.1, 0.15, 0.5, 0.15, 0.1};	
-	float32_t InputArray[10]; //= {0.5, 0.9, 0.34, 0.69, 0.34, 0.12, 0.89};
-	float32_t OutputArray_ASM[10];
-	float32_t OutputArray_C[10];
-	float32_t OutputArray_CMSIS[10];
-	for(int32_t i = 0; i < 10; i++){
+	const uint32_t length = 10;
+	const uint32_t order = 5;
+	float32_t FIR_coeff[order] = {0.1, 0.15, 0.5, 0.15, 0.1};	
+	float32_t InputArray[length]; //= {0.5, 0.9, 0.34, 0.69, 0.34, 0.12, 0.89};
+	float32_t OutputArray_ASM[length];
+	float32_t OutputArray_C[length];
+	float32_t OutputArray_CMSIS[length];
+	for(int32_t i = 0; i < length; i++){
 		InputArray[i] = (float)sin((double)i);
 		//printf("InputArray[%d] = %.4f\n", i, InputArray[i]);
 	}
 	
 	//puts("Modified");
 	for(int32_t j = 0; j < 1; j++){
-		int r = rand() % 10;
+		int r = rand() % length;
 		InputArray[r] = InputArray[r] + (float32_t)(rand() % 4);
 		//printf("InputArray[%d] = %.4f\n", r, InputArray[r]);
 	}
+	printf("%s", "Executing function FIR_ASM\n");
+	FIR_ASM(InputArray, OutputArray_ASM, FIR_coeff, length, 4);
 	
-	FIR_ASM(InputArray, OutputArray_ASM, FIR_coeff, 10, 4);
-	
-	FIR_C(InputArray, OutputArray_C, FIR_coeff, 10, 4);
-	FIR_CMSIS(InputArray, OutputArray_CMSIS, FIR_coeff, 10, 5);
+	printf("%s", "Executing function FIR_C\n");
+	FIR_C(InputArray, OutputArray_C, FIR_coeff, length, 4);
+	printf("%s", "Executing function FIR_CMSIS\n");
+	FIR_CMSIS(InputArray, OutputArray_CMSIS, FIR_coeff, length, order);
 	
 	for(int i = 0; i < 10; i++){
 		printf("OA_C[%d] = %.4f\tOA_ASM[%d] = %.4f\tOA_CMSIS[%d] = %.4f\n", 
@@ -71,7 +75,7 @@ int32_t testbench()
 	return 0;
 }
 
-int32_t main(){
+int main(){
 	testbench();
 	
 	return 0;
