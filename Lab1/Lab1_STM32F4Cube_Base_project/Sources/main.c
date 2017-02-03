@@ -2,8 +2,11 @@
 #include <time.h>
 #include "main.h"
 
-extern int FIR_asm();
+extern void FIR_asm();
 
+/*
+
+*/
 int32_t FIR_C(float32_t* InputArray, float32_t* OutputArray, float32_t* FIR_coeff, int32_t Length, int32_t Order){
 	
 	for(int32_t i = 0; i < Length - Order; i++){ 
@@ -14,10 +17,6 @@ int32_t FIR_C(float32_t* InputArray, float32_t* OutputArray, float32_t* FIR_coef
 		OutputArray[i] = sum;
 	}
 	return 0;
-}
-
-int FIR_ASM(float32_t* InputArray, float32_t* OutputArray, float32_t* FIR_coeff, uint32_t Length, uint32_t Order){
-	return FIR_asm(InputArray, OutputArray, Length, FIR_coeff);
 }
 
 int32_t FIR_CMSIS(float32_t* InputArray, float32_t* OutputArray, float32_t* FIR_coeff, uint32_t Length, uint32_t Order){
@@ -41,7 +40,12 @@ int32_t Data_Sub(float32_t* InputArray, float32_t* OutputArray, float32_t* Resul
 	}
 	return 0;
 }
-
+/*
+* Input: float32_t* A, uint32_t Length, uint16_t CMSIS, uint32_t Order
+* Output: float32_t* sum
+* Returns: -1 if size of the array is not equal to length
+* Description: Adds all the element of the input array (A) and stores the value in the variable sum
+*/
 int32_t Sum_Array(float32_t* A, uint32_t Length, float32_t* sum, uint16_t CMSIS, uint32_t Order){
 	uint32_t j = (CMSIS == 1) ? Order : 0;
 	
@@ -56,31 +60,43 @@ int32_t Sum_Array(float32_t* A, uint32_t Length, float32_t* sum, uint16_t CMSIS,
 	return 0;
 }
 
+
+/* 
+* Input:   float32_t* Input, int32_t LmO, uint16_t CMSIS, uint32_t Order
+* Output:  float32_t* std, float32_t* mavg
+* Returns: -1 when an error is encounter, 0 otherwise
+*
+* Description: Calculates the standard deviation and mean average for an array of input values. 
+*	The underlying algorithm is used for standard deviation:
+*
+* std = sqrt((sumOfSquares - sum^2 / LmO) / (LmO - 1))
+*   where, sumOfSquares = Input[0] * Input[0] + Input[1] * Input[1] + ... + Input[blockSize-1] * Input[blockSize-1]
+*                   sum = Input[0] + Input[1] + Input[2] + ... + Input[blockSize-1]
+*/
 int32_t stdev(float32_t* Input, int32_t LmO, uint16_t CMSIS, uint32_t Order, float32_t* std,  float32_t* mavg) {
+	// Identifies if the Input array comes from CMSIS filter, since its actual filter values start at the Order-th place
 	uint32_t j = (CMSIS == 1) ? Order : 0;
-	float32_t sum = 0;
-	float32_t sumOfmul = 0;
-	float32_t covar[LmO];
 	
-	int32_t error = Sum_Array(Input, LmO, &sum, CMSIS, Order); // LmO = Length minus Order
+	// Local values of the function
+	float32_t sum = 0;      // Retains the sum of all the input array elements
+	float32_t sumOfmul = 0; // Retains the value of all the variance array element
+	float32_t covar[LmO];   // Retains the value of all the variance of for each input array element in an array format. LmO = Length minus Order
+	
+	// Generates the mean average and detects error in the sum
+	int32_t error = Sum_Array(Input, LmO, &sum, CMSIS, Order); 
 	if (error < 0) {return -1;}
-	
 	*mavg = sum/(float32_t)LmO;
 	
+	// Computes the standard deviation
 	for (uint32_t i = 0; i < LmO; i++) {
-		//mul = (Input[j] - *mavg);
-		covar[i] = Input[j] * Input[j]; //mul * mul;
+		covar[i] = Input[j] * Input[j];
 		j++;
 	}
 	error = Sum_Array(covar, LmO, &sumOfmul, 0, 0);
-	if (error < 0) {return -1;}
-  
+	if (error < 0) {return -1;} 
 	float32_t meanOfsquare = sumOfmul/(float32_t)(LmO - 1);
-	float32_t squareOfmavg = ((sum * sum)/(float32_t)LmO)/(float32_t)(LmO - 1);
-	
+	float32_t squareOfmavg = ((sum * sum)/(float32_t)LmO)/(float32_t)(LmO - 1);	
 	*std = sqrt(meanOfsquare - squareOfmavg);
-	
-	
 	
 	return 0;
 }
@@ -120,7 +136,7 @@ int32_t CMSIS_DSP_lib(float32_t* InputArray, float32_t* FIR_result, float32_t* s
 	return 0;
 	
 }
-int32_t testbench(sub)
+int32_t testbench()
 {	
 	// PART I
 	puts("PART I\n");
@@ -146,7 +162,8 @@ int32_t testbench(sub)
 		//printf("InputArray[%d] = %.4f\n", r, InputArray[r]);
 //	}
 	
-	FIR_ASM(InputArray, OutputArray_ASM, FIR_coeff, length, 4);
+	//FIR_ASM(InputArray, OutputArray_ASM, FIR_coeff, length, 4);
+	FIR_asm(InputArray, OutputArray_ASM, length, FIR_coeff);
 		
 	FIR_C(InputArray, OutputArray_C, FIR_coeff, length, 4);
 	
