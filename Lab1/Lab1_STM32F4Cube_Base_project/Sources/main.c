@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include <math.h>
 #include "main.h"
 
 // Calls the assembly code for the FIR filter
@@ -93,12 +94,11 @@ int32_t Sum_Array(float32_t* A, uint32_t Length, float32_t* sum, uint16_t CMSIS,
 int32_t stdev(float32_t* Input, int32_t LmO, uint16_t CMSIS, uint32_t Order, float32_t* std,  float32_t* mavg) {
 	// Identifies if the Input array comes from CMSIS filter, since its actual filter values start at the Order-th place
 	uint32_t j = (CMSIS == 1) ? Order : 0;
-	
 	// Local values of the function
 	float32_t sum = 0;      // Retains the sum of all the input array elements
 	float32_t sumOfmul = 0; // Retains the value of all the variance array element
-	float32_t covar[LmO];   // Retains the value of all the variance of for each input array element in an array format. LmO = Length minus Order
-	
+	float32_t covar[16];   // Retains the value of all the variance of for each input array element in an array format. LmO = Length minus Order
+	float32_t mul = 0;
 	// Generates the mean average and detects error in the sum
 	int32_t error = Sum_Array(Input, LmO, &sum, CMSIS, Order); 
 	if (error < 0) {return -1;}
@@ -106,15 +106,21 @@ int32_t stdev(float32_t* Input, int32_t LmO, uint16_t CMSIS, uint32_t Order, flo
 	
 	// Computes the standard deviation
 	for (uint32_t i = 0; i < LmO; i++) {
-		covar[i] = Input[j] * Input[j];
+		mul = Input[j];
+		covar[i] = pow(mul, 2);//(Input[j] * Input[j]);
+		//printf("covar[%d] = %.8f\tInput[%d] = %.4f\n", i, covar[i], j, Input[j]);
 		j++;
 	}
 	error = Sum_Array(covar, LmO, &sumOfmul, 0, 0);
 	if (error < 0) {return -1;} 
-	float32_t meanOfsquare = sumOfmul/(float32_t)(LmO - 1);
-	float32_t squareOfmavg = ((sum * sum)/(float32_t)LmO)/(float32_t)(LmO - 1);	
-	*std = sqrt(meanOfsquare - squareOfmavg);
 	
+	//printf("sumOFmul = %.4f\tsum = %.4f\n", sumOfmul, sum);
+	float32_t temp = fabsf((sumOfmul - ((sum * sum)/LmO)));
+	*std = sqrt(temp / (LmO - 1) );
+	//((float32_t)(LmO - 1)));
+	//float32_t meanOfsquare = sumOfmul/(float32_t)(LmO - 1);
+	//float32_t squareOfmavg = ((sum * sum)/(float32_t)LmO)/(float32_t)(LmO - 1);	
+	//*std = sqrt(meanOfsquare - squareOfmavg);
 	return 0;
 }
 /* Function   : corr_coeff
@@ -125,9 +131,8 @@ int32_t stdev(float32_t* Input, int32_t LmO, uint16_t CMSIS, uint32_t Order, flo
 
 int32_t corr_coeff(float32_t* Input, float32_t* FIR_result, int32_t LmO, uint16_t CMSIS, uint32_t Order, float32_t* correlation) {
 	uint32_t j = (CMSIS == 1) ? Order : 0;
-	
-	float32_t covar_Sum, std_FIR, std_IN, input_mavg, result_mavg = 0;
-	float32_t covar_FIR[LmO], covar_IN[LmO], covar_R[LmO];
+	float32_t covar_Sum, std_FIR, std_IN, input_mavg, result_mavg;
+	float32_t covar_FIR[16], covar_IN[16], covar_R[16]; // LmO = Length minus Order
 		
 	int32_t error = stdev(Input, LmO, 0, 0, &std_IN, &input_mavg);
 	if (error < 0) {return -1;}
@@ -161,32 +166,32 @@ int32_t CMSIS_DSP_lib(float32_t* InputArray, float32_t* FIR_result, uint32_t Len
 	arm_mean_f32(sub, Length, mean);
 	
 	arm_correlate_f32(InputArray, Length, FIR_result, Length , Corr_Array);
-	
+
 	return 0;
 	
 }
 
 /* Function   : testbench
- * Description: Runs all the required tasks for the purpose of lab1
+ * Description: Runs all the required tasks for part I and part II of lab1.
  */
 int32_t testbench()
 {	
 	// PART I
 	puts("PART I\n");
 	srand(time(NULL));
-	
-	// Stablishes the local variables for execution
-	const uint32_t length = 7;
+
+	const uint32_t length = 20;
 	const uint32_t order = 5;
 	float32_t FIR_coeff[order] = {0.1, 0.15, 0.5, 0.15, 0.1};	
-	float32_t InputArray[length] = {0.5, 0.9, 0.34, 0.69, 0.34, 0.12, 0.89};
+	float32_t InputArray[length] = {1.0, 1.07, 1.15, 1.2, 1.25, 1.3, 1.358, 1.39, 1.15, 1.2, 1.15, 1.1, 1.05, 1.0, 0.8, 0.6, 0.4, 0.0, -0.3, -0.8};//{0.5, 0.9, 0.34, 0.69, 0.34, 0.12, 0.89, 0.43};
 	float32_t OutputArray_ASM[length];
 	float32_t OutputArray_C[length];
 	float32_t OutputArray_CMSIS[length];
 
-	// Runs the input array into each type of FIR filter
-	FIR_asm(InputArray, OutputArray_ASM, length, FIR_coeff);	
-	FIR_C(InputArray, FIR_coeff, length, 4, OutputArray_C);	
+	FIR_asm(InputArray, OutputArray_ASM, length, FIR_coeff);
+		
+	FIR_C(InputArray, FIR_coeff, length, order - 1, OutputArray_C);
+	
 	FIR_CMSIS(InputArray, OutputArray_CMSIS, FIR_coeff, length, order);
 	
 	// Prints out the values obtained from each filter implementation
@@ -197,8 +202,9 @@ int32_t testbench()
 	
 	//PART II
 	puts("\nPART II - A\n");
+
 	// a) Get the difference between the input and the filtered value
-	int32_t size = length-order+1;
+	const int32_t size = length-order+1;
 	float32_t sub_ASM[size], sub_C[size], sub_CMSIS[size]; 
 	
 	// Difference with respect to the assembly based FIR filter and the input
@@ -241,7 +247,6 @@ int32_t testbench()
 	
 	// c) Calculate the correlation between the input and the different FIR filters type
 	float32_t corr_ASM, corr_C, corr_CMSIS;
-	float32_t correlation[size * 2];
 	
 	// Calculate the correlation between the input and assembly based FIR filter's output values
 	error = corr_coeff(InputArray, OutputArray_ASM, size, 0, 0, &corr_ASM);
@@ -260,8 +265,9 @@ int32_t testbench()
 	
 	// Repeat of PART II by using the CMSIS-DSP Library 
 	puts("\nPART II - B\n");
-	float32_t OutputArray_CMSIS_lib[size], sub_ASM_lib[size], sub_C_lib[size], sub_CMSIS_lib[size], std_ASM_lib, std_C_lib, std_CMSIS_lib; 
-	float32_t mavg_ASM_lib, mavg_C_lib, mavg_CMSIS_lib, corr_ASM_lib[size*2], corr_C_lib[size*2], corr_CMSIS_lib[size*2];
+
+	float32_t OutputArray_CMSIS_lib[size], sub_ASM_lib[size], sub_C_lib[size], sub_CMSIS_lib[size], corr_ASM_lib[size], corr_C_lib[size];
+  float32_t	corr_CMSIS_lib[size], std_ASM_lib, std_C_lib, std_CMSIS_lib, mavg_ASM_lib, mavg_C_lib, mavg_CMSIS_lib; 
 	
 	// Calculating the difference, standard deviation, average and correlation for each filter
 	CMSIS_DSP_lib(InputArray, OutputArray_ASM, size, sub_ASM_lib, &std_ASM_lib, &mavg_ASM_lib, corr_ASM_lib);
@@ -279,6 +285,12 @@ int32_t testbench()
 	// Prints the results obtained for the standard deviation and average
 	printf("Standard deviation: ASM = %.4f\tC = %.4f\tCMSIS = %.4f\n", std_ASM_lib, std_C_lib, std_CMSIS_lib);
 	printf("Mean average: ASM = %.4f\tC = %.4f\tCMSIS = %.4f\n",mavg_ASM_lib, mavg_C_lib, mavg_CMSIS_lib);
+	
+	for(int32_t i = 0; i < size; i++){
+		printf("Correlation: corr_ASM_lib[%d] = %.4f\tcorr_C_lib[%d] = %.4f\tcorr_CMSIS_lib[%d] = %.4f\n", 
+		i, corr_ASM_lib[i], i, corr_C_lib[i], i, corr_CMSIS_lib[i]);
+	}
+	
 	
 	return 0;
 }
