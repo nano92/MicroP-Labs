@@ -1,10 +1,7 @@
-#include <stdio.h>
-#include <time.h>
 #include <math.h>
 #include "main.h"
-
-// Calls the assembly code for the FIR filter
-extern void FIR_asm();
+#include "testbench.h"
+ 
 
 /* Function   : FIR_C
  * Input      : float32_t* InputArray, float32_t* FIR_coeff, uint32_t Length, uint32_t Order
@@ -91,13 +88,15 @@ int32_t Sum_Array(float32_t* A, uint32_t Length, float32_t* sum, uint16_t CMSIS,
  *   where, sumOfSquares = Input[0] * Input[0] + Input[1] * Input[1] + ... + Input[blockSize-1] * Input[blockSize-1]
  *                   sum = Input[0] + Input[1] + Input[2] + ... + Input[blockSize-1]
  */
-int32_t stdev(float32_t* Input, int32_t LmO, uint16_t CMSIS, uint32_t Order, float32_t* std,  float32_t* mavg) {
+int32_t stdev(float32_t* Input, const int32_t LmO, uint16_t CMSIS, uint32_t Order, float32_t* covar, float32_t* std,  float32_t* mavg) {
 	// Identifies if the Input array comes from CMSIS filter, since its actual filter values start at the Order-th place
 	uint32_t j = (CMSIS == 1) ? Order : 0;
+	//Reset covar[] temporary variable
+	//Retains the value of all the variance of for each input array element in an array format. LmO = Length minus Order
+	memset(covar, 0, LmO);
 	// Local values of the function
 	float32_t sum = 0;      // Retains the sum of all the input array elements
 	float32_t sumOfmul = 0; // Retains the value of all the variance array element
-	float32_t covar[16];   // Retains the value of all the variance of for each input array element in an array format. LmO = Length minus Order
 	float32_t mul = 0;
 	// Generates the mean average and detects error in the sum
 	int32_t error = Sum_Array(Input, LmO, &sum, CMSIS, Order); 
@@ -107,45 +106,42 @@ int32_t stdev(float32_t* Input, int32_t LmO, uint16_t CMSIS, uint32_t Order, flo
 	// Computes the standard deviation
 	for (uint32_t i = 0; i < LmO; i++) {
 		mul = Input[j];
-		covar[i] = pow(mul, 2);//(Input[j] * Input[j]);
-		//printf("covar[%d] = %.8f\tInput[%d] = %.4f\n", i, covar[i], j, Input[j]);
+		covar[i] = pow(mul, 2);
 		j++;
 	}
 	error = Sum_Array(covar, LmO, &sumOfmul, 0, 0);
 	if (error < 0) {return -1;} 
 	
-	//printf("sumOFmul = %.4f\tsum = %.4f\n", sumOfmul, sum);
 	float32_t temp = fabsf((sumOfmul - ((sum * sum)/LmO)));
 	*std = sqrt(temp / (LmO - 1) );
-	//((float32_t)(LmO - 1)));
-	//float32_t meanOfsquare = sumOfmul/(float32_t)(LmO - 1);
-	//float32_t squareOfmavg = ((sum * sum)/(float32_t)LmO)/(float32_t)(LmO - 1);	
-	//*std = sqrt(meanOfsquare - squareOfmavg);
+
 	return 0;
 }
 /* Function   : corr_coeff
  * Input      : float32_t* Input, float32_t* FIR_result, int32_t LmO, uint16_t CMSIS, uint32_t Order
  * Output     : float32_t* correlation
- * Description: Calculates the correlation between the input arrays Input and FIR_result, and later pass the result to correlation.
+ * Description: Calculates the correlation coeffcient between the input arrays Input and FIR_result.
  */
 
-int32_t corr_coeff(float32_t* Input, float32_t* FIR_result, int32_t LmO, uint16_t CMSIS, uint32_t Order, float32_t* correlation) {
+int32_t corr_coeff(float32_t* Input, float32_t* FIR_result, const int32_t LmO, uint16_t CMSIS, uint32_t Order, float32_t* covar, float32_t* correlation) {
 	uint32_t j = (CMSIS == 1) ? Order : 0;
 	float32_t covar_Sum, std_FIR, std_IN, input_mavg, result_mavg;
-	float32_t covar_FIR[16], covar_IN[16], covar_R[16]; // LmO = Length minus Order
 		
-	int32_t error = stdev(Input, LmO, 0, 0, &std_IN, &input_mavg);
+	int32_t error = stdev(Input, LmO, 0, 0, covar, &std_IN, &input_mavg);
 	if (error < 0) {return -1;}
 	
-	error = stdev(FIR_result, LmO, CMSIS, Order, &std_FIR, &result_mavg);
+	error = stdev(FIR_result, LmO, CMSIS, Order, covar, &std_FIR, &result_mavg);
 	if (error < 0) {return -1;}
+	
+	//Reset covar[] temporary variable
+	memset(covar, 0, LmO);
 	
 	for(int32_t i = 0; i < LmO; i++){
-		covar_R[i] = ((Input[i] - input_mavg)/std_IN) * ((FIR_result[i + j] - result_mavg)/std_FIR);
+		covar[i] = ((Input[i] - input_mavg)/std_IN) * ((FIR_result[i + j] - result_mavg)/std_FIR);
 	}
 	
 	covar_Sum = 0;
-	error = Sum_Array(covar_R, LmO, &covar_Sum, 0, 0);
+	error = Sum_Array(covar, LmO, &covar_Sum, 0, 0);
 	if (error < 0) {return -1;}
 	
 	*correlation = covar_Sum/(float32_t)LmO; 
@@ -171,132 +167,12 @@ int32_t CMSIS_DSP_lib(float32_t* InputArray, float32_t* FIR_result, uint32_t Len
 	
 }
 
-/* Function   : testbench
- * Description: Runs all the required tasks for part I and part II of lab1.
- */
-int32_t testbench()
-{	
-	// PART I
-	puts("PART I\n");
-	srand(time(NULL));
-
-	const uint32_t length = 20;
-	const uint32_t order = 5;
-	float32_t FIR_coeff[order] = {0.1, 0.15, 0.5, 0.15, 0.1};	
-	float32_t InputArray[length] = {1.0, 1.07, 1.15, 1.2, 1.25, 1.3, 1.358, 1.39, 1.15, 1.2, 1.15, 1.1, 1.05, 1.0, 0.8, 0.6, 0.4, 0.0, -0.3, -0.8};//{0.5, 0.9, 0.34, 0.69, 0.34, 0.12, 0.89, 0.43};
-	float32_t OutputArray_ASM[length];
-	float32_t OutputArray_C[length];
-	float32_t OutputArray_CMSIS[length];
-
-	FIR_asm(InputArray, OutputArray_ASM, length, FIR_coeff);
-		
-	FIR_C(InputArray, FIR_coeff, length, order - 1, OutputArray_C);
-	
-	FIR_CMSIS(InputArray, OutputArray_CMSIS, FIR_coeff, length, order);
-	
-	// Prints out the values obtained from each filter implementation
-	for(int i = 0; i < length; i++){
-		printf("OA_C[%d] = %.4f\tOA_ASM[%d] = %.4f\tOA_CMSIS[%d] = %.4f\n", 
-			i, OutputArray_C[i], i, OutputArray_ASM[i], i, OutputArray_CMSIS[i]);
-	}
-	
-	//PART II
-	puts("\nPART II - A\n");
-
-	// a) Get the difference between the input and the filtered value
-	const int32_t size = length-order+1;
-	float32_t sub_ASM[size], sub_C[size], sub_CMSIS[size]; 
-	
-	// Difference with respect to the assembly based FIR filter and the input
-	int32_t error = Data_Sub(InputArray, sub_ASM, length, order-1, 0, OutputArray_ASM);
-	if (error < 0) { printf("Error in data sub assembly"); return -1;}
-	
-	// Difference with respect to the C based FIR filter and the input
-	error = Data_Sub(InputArray, sub_C, length, order-1, 0, OutputArray_C);
-	if (error < 0) { printf("Error in data sub C"); return -1;}
-	
-	// Difference with respect to the CMSIS FIR filter and the input
-	error = Data_Sub(InputArray, sub_CMSIS, length, order-1, 1, OutputArray_CMSIS);
-	if (error < 0) { printf("Error in data sub CMSIS"); return -1;}
-	
-	// Prints out the results obtained from the 3 substraction processes
-	for(int32_t i = 0; i < size; i++){
-		printf("Substraction: sub_ASM[%d] = %.4f\tsub_C[%d] = %.4f\tsub_CMSIS[%d] = %.4f\n", 
-		i, sub_ASM[i], i, sub_C[i], i, sub_CMSIS[i]);
-	}	
-	
-	// b) Get the standard deviation and average for each difference
-	float32_t std_ASM, std_C, std_CMSIS;
-	float32_t mavg_ASM, mavg_C, mavg_CMSIS;
-	
-	// Calculating the standard deviation and average for the assembly based difference
-	error = stdev(sub_ASM, size, 0, 0, &std_ASM, &mavg_ASM);
-	if (error < 0) { printf("Error in stdev assembly"); return -1;}
-	
-	// Calculating the standard deviation and average for the C based difference
-	error = stdev(sub_C, size, 0, 0, &std_C, &mavg_C);
-	if (error < 0) { printf("Error in stdev C"); return -1;}
-	
-	// Calculating the standard deviation and average for the CMSIS FIR difference
-	error = stdev(sub_CMSIS, size, 0, 0, &std_CMSIS, &mavg_CMSIS);
-	if (error < 0) { printf("Error in stdev CMSIS"); return -1;}
-	
-	// Prints the results obtained for each standard deviation and average
-	printf("Standard deviation: ASM = %.4f\tC = %.4f\tCMSIS = %.4f\n", std_ASM, std_C, std_CMSIS);
-	printf("Mean average: ASM = %.4f\tC = %.4f\tCMSIS = %.4f\n",mavg_ASM, mavg_C, mavg_CMSIS);
-	
-	// c) Calculate the correlation between the input and the different FIR filters type
-	float32_t corr_ASM, corr_C, corr_CMSIS;
-	
-	// Calculate the correlation between the input and assembly based FIR filter's output values
-	error = corr_coeff(InputArray, OutputArray_ASM, size, 0, 0, &corr_ASM);
-	if (error < 0) { printf("Error in correlation assembly"); return -1;}
-	
-	// Calculate the correlation between the input and C based FIR filter's output values
-	error = corr_coeff(InputArray, OutputArray_C, size, 0, 0, &corr_C);
-	if (error < 0) { printf("Error in correlation C"); return -1;}
-	
-	// Calculate the correlation between the input and CMSIS FIR filter's output values
-	error = corr_coeff(InputArray, OutputArray_CMSIS, size, 1, order - 1, &corr_CMSIS);
-	if (error < 0) { printf("Error in correlation CMSIS"); return -1;}
-	
-	// Prints the results obtained for each correlation 
-	printf("Correlation: ASM = %.4f\tC = %.4f\tCMSIS = %.4f\n", corr_ASM, corr_C, corr_CMSIS);
-	
-	// Repeat of PART II by using the CMSIS-DSP Library 
-	puts("\nPART II - B\n");
-
-	float32_t OutputArray_CMSIS_lib[size], sub_ASM_lib[size], sub_C_lib[size], sub_CMSIS_lib[size], corr_ASM_lib[size], corr_C_lib[size];
-  float32_t	corr_CMSIS_lib[size], std_ASM_lib, std_C_lib, std_CMSIS_lib, mavg_ASM_lib, mavg_C_lib, mavg_CMSIS_lib; 
-	
-	// Calculating the difference, standard deviation, average and correlation for each filter
-	CMSIS_DSP_lib(InputArray, OutputArray_ASM, size, sub_ASM_lib, &std_ASM_lib, &mavg_ASM_lib, corr_ASM_lib);
-	CMSIS_DSP_lib(InputArray, OutputArray_C, size, sub_C_lib, &std_C_lib, &mavg_C_lib, corr_C_lib);
-	for(int32_t i = 0; i < size; i++){
-		OutputArray_CMSIS_lib[i] = OutputArray_CMSIS[i + order - 1];
-	}
-	CMSIS_DSP_lib(InputArray, OutputArray_CMSIS_lib, size, sub_CMSIS_lib, &std_CMSIS_lib, &mavg_CMSIS_lib, corr_CMSIS_lib);
-	
-	for(int32_t i = 0; i < size; i++){
-		printf("Substraction: sub_ASM_lib[%d] = %.4f\tsub_C_lib[%d] = %.4f\tsub_CMSIS_lib[%d] = %.4f\n", 
-		i, sub_ASM_lib[i], i, sub_C_lib[i], i, sub_CMSIS_lib[i]);
-	}
-	
-	// Prints the results obtained for the standard deviation and average
-	printf("Standard deviation: ASM = %.4f\tC = %.4f\tCMSIS = %.4f\n", std_ASM_lib, std_C_lib, std_CMSIS_lib);
-	printf("Mean average: ASM = %.4f\tC = %.4f\tCMSIS = %.4f\n",mavg_ASM_lib, mavg_C_lib, mavg_CMSIS_lib);
-	
-	for(int32_t i = 0; i < size; i++){
-		printf("Correlation: corr_ASM_lib[%d] = %.4f\tcorr_C_lib[%d] = %.4f\tcorr_CMSIS_lib[%d] = %.4f\n", 
-		i, corr_ASM_lib[i], i, corr_C_lib[i], i, corr_CMSIS_lib[i]);
-	}
-	
-	
-	return 0;
-}
-
 int main(){
-	testbench();
+	if(testbench() < 0){ 
+		puts("Testbench failed"); 
+	}else{
+		puts("Testbench succeeded");
+	}
 	
 	return 0;
 }
