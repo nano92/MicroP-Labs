@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * File Name          : ADC.c
+  * File Name          : ADC.h
   * Description        : This file provides code for the configuration
   *                      of the ADC instances.
   ******************************************************************************
@@ -31,80 +31,43 @@
   *
   ******************************************************************************
   */
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __adc_H
+#define __adc_H
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "adc.h"
+#include "stm32f4xx_hal.h"
 
-/* USER CODE BEGIN 0 */
+/* USER CODE BEGIN Includes */
 
-ADC_InitTypeDef ADC1_init;
-ADC_ChannelConfTypeDef channel_config;
-ADC_MultiModeTypeDef multi_mode_config;
+/* USER CODE END Includes */
 
-HAL_StatusTypeDef StartADCHandle(ADC_HandleTypeDef *ADC1_Handle){
-	HAL_StatusTypeDef status;
-	
-	HAL_ADC_MspInit(ADC1_Handle);
-	__HAL_RCC_ADC1_CLK_ENABLE(); //Enable ADC1 GPIO clock
-	
-	ADC1_Handle->Instance = ADC1;
-	ADC1_Handle->Init = ADC1_init;
-	ADC1_Handle->Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV8;
-	ADC1_Handle->Init.Resolution = ADC_RESOLUTION12b;
-	ADC1_Handle->Init.DataAlign = ADC_DATAALIGN_LEFT;
-	ADC1_Handle->Init.ScanConvMode = DISABLE;
-	ADC1_Handle->Init.EOCSelection = ADC_EOC_SEQ_CONV;
-	ADC1_Handle->Init.ContinuousConvMode = DISABLE;
-	ADC1_Handle->Init.DMAContinuousRequests = DISABLE;
-	ADC1_Handle->Init.NbrOfConversion = 1;
-	ADC1_Handle->Init.DiscontinuousConvMode = DISABLE;
-	ADC1_Handle->Init.NbrOfDiscConversion = 1;
-	
-	channel_config.Channel = ADC_CHANNEL_TEMPSENSOR;
-	channel_config.Rank = 1;
-	channel_config.SamplingTime = ADC_SAMPLETIME_480CYCLES;
-	
-	multi_mode_config.Mode = ADC_MODE_INDEPENDENT;
-	multi_mode_config.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_20CYCLES;
-	
-	status = HAL_ADC_ConfigChannel(ADC1_Handle, &channel_config);
-	if(status != HAL_OK){
-		printf("HAL_ADC_ConfigChannel status: %d\n", status);
-		return status;
-	}
-	
-	status = HAL_ADCEx_MultiModeConfigChannel(ADC1_Handle, &multi_mode_config);
-	if(status != HAL_OK){
-		printf("HAL_ADCEx_MultiModeConfigChannel status: %d\n", status);
-		return status;
-	}
-	
-	return status;
+
+/* USER CODE BEGIN Private defines */
+
+/* USER CODE END Private defines */
+
+
+/* USER CODE BEGIN Prototypes */
+	HAL_StatusTypeDef StartADCHandle(ADC_HandleTypeDef *ADC1_Handle);
+	HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef *ADC1_Handle);
+	 
+/* USER CODE END Prototypes */
+
+#ifdef __cplusplus
 }
-
-HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef *ADC1_Handle){
-	uint32_t temp_value = 0;
-	HAL_StatusTypeDef status;
-		
-	status = HAL_ADC_Start(ADC1_Handle);
-	if(status != HAL_OK){
-		printf("HAL_ADC_Start status: %d\n", status);
-		return status;
-	}
-	
-	status = HAL_ADC_PollForConversion(ADC1_Handle, 1000);
-	if(status != HAL_OK){	
-		printf("HAL_ADC_PollForConversion status: %d\n", status);
-		return status;
-	}
-	
-	temp_value = HAL_ADC_GetValue(ADC1_Handle);
-	printf("ADC temperature value: %u\n", temp_value);
-	
-	return status;
-}
-/* USER CODE END 0 */
+#endif
+#endif /*__ adc_H */
 
 
+
+
+
+/**
+  * @}
+  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

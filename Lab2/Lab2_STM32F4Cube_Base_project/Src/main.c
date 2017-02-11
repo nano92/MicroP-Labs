@@ -44,6 +44,8 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
+ADC_HandleTypeDef ADC1_Handle;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,7 +64,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+	HAL_StatusTypeDef status;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -75,12 +77,23 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
+	status = StartADCHandle(&ADC1_Handle);
+	if(status != HAL_OK){
+		printf("StartADCHandle status: %d\n", status);
+		//Need to add an interrupt handler
+	}
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+		status = GetTempValue(&ADC1_Handle);
+		if(status == HAL_OK){
+			printf("Success\n");
+		}else{
+			printf("Error\n");
+		}
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
