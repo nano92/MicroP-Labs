@@ -42,7 +42,18 @@
 /* Configure GPIO                                                             */
 /*----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
+GPIO_InitTypeDef GPIO_init;
 
+HAL_StatusTypeDef StartGPIO(){
+	HAL_StatusTypeDef status;
+
+	__HAL_RCC_GPIOD_CLK_ENABLE();
+	
+	GPIO_init.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4
+										| GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
+	
+	HAL_GPIO_Init(GPIOD, &GPIO_init);
+}
 /* USER CODE END 1 */
 
 /** Configure pins as 
