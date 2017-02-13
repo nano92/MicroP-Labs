@@ -44,8 +44,8 @@ ADC_MultiModeTypeDef multi_mode_config;
 HAL_StatusTypeDef StartADCHandle(ADC_HandleTypeDef *ADC1_Handle){
 	HAL_StatusTypeDef status;
 	
-	HAL_ADC_MspInit(ADC1_Handle);
 	__HAL_RCC_ADC1_CLK_ENABLE(); //Enable ADC1 GPIO clock
+	
 	
 	ADC1_Handle->Instance = ADC1;
 	ADC1_Handle->Init = ADC1_init;
@@ -59,6 +59,12 @@ HAL_StatusTypeDef StartADCHandle(ADC_HandleTypeDef *ADC1_Handle){
 	ADC1_Handle->Init.NbrOfConversion = 1;
 	ADC1_Handle->Init.DiscontinuousConvMode = DISABLE;
 	ADC1_Handle->Init.NbrOfDiscConversion = 1;
+	
+	status = HAL_ADC_Init(ADC1_Handle);
+	if(status != HAL_OK){
+		printf("HAL_ADC_Init status: %d\n", status);
+		return status;
+	}
 	
 	channel_config.Channel = ADC_CHANNEL_TEMPSENSOR;
 	channel_config.Rank = 1;
@@ -92,7 +98,7 @@ HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef *ADC1_Handle){
 		return status;
 	}
 	
-	status = HAL_ADC_PollForConversion(ADC1_Handle, 1000);
+	status = HAL_ADC_PollForConversion(ADC1_Handle, 10);
 	if(status != HAL_OK){	
 		printf("HAL_ADC_PollForConversion status: %d\n", status);
 		return status;
@@ -100,6 +106,12 @@ HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef *ADC1_Handle){
 	
 	temp_value = HAL_ADC_GetValue(ADC1_Handle);
 	printf("ADC temperature value: %u\n", temp_value);
+	
+	status = HAL_ADC_Stop(ADC1_Handle);
+	if(status != HAL_OK){
+		printf("HAL_ADC_Stop status: %d\n", status);
+		return status;
+	}
 	
 	return status;
 }
