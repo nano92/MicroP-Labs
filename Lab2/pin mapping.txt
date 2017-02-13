@@ -1,0 +1,15 @@
+4 digit - 7 segment
+
+A 	pin 14 	Yellow
+B 	pin 16 	Blue
+C 	pin 13 	Purple
+D 	pin 3  	Orange
+E 	pin 5  	White
+F 	pin 11 	Green
+G 	pin 15  Grey
+Point  	pin 7	Red
+
+Digit1	pin 1	Black-resitor-Gray
+Digit2	pin 2	Blue-resitor-Blue
+Digit3	pin 6	Orange-resistor-Orange
+Digit4	pin 8	Green-resistor-Green
