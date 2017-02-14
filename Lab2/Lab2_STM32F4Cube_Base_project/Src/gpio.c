@@ -42,17 +42,32 @@
 /* Configure GPIO                                                             */
 /*----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
-GPIO_InitTypeDef GPIO_init;
+GPIO_InitTypeDef GPIOD_init;
+GPIO_InitTypeDef GPIOA_init;
 
-HAL_StatusTypeDef StartGPIO(){
-	HAL_StatusTypeDef status;
-
+void Start7SegmentDisplayGPIO(){
+	
 	__HAL_RCC_GPIOD_CLK_ENABLE();
+	__HAL_RCC_GPIOA_CLK_ENABLE();
 	
-	GPIO_init.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4
+	GPIOD_init.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4
 										| GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
+	GPIOA_init.Pin = GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5;
 	
-	HAL_GPIO_Init(GPIOD, &GPIO_init);
+	GPIOD_init.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIOA_init.Mode = GPIO_MODE_OUTPUT_PP;
+	
+	GPIOD_init.Pull = GPIO_PULLUP;
+	GPIOA_init.Pull = GPIO_PULLUP;
+	
+	GPIOD_init.Speed = GPIO_SPEED_FAST;
+	GPIOA_init.Speed = GPIO_SPEED_FAST;
+	
+	HAL_GPIO_Init(GPIOD, &GPIOD_init);
+	HAL_GPIO_Init(GPIOA, &GPIOA_init);
+}
+
+void DisplayTemperature(){
 }
 /* USER CODE END 1 */
 
