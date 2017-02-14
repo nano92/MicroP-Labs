@@ -142,7 +142,23 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void decoding(char number, char* segment) {
+	switch (number) {
+			case '0' : segment = "1000000";
+			case '1' : segment = "1111001";
+			case '2' : segment = "0100100";
+			case '3' : segment = "0110000";
+			case '4' : segment = "0011001";
+			case '5' : segment = "0010010";
+			case '6' : segment = "0000010";
+			case '7' : segment = "1111000";
+			case '8' : segment = "0000000";
+			case '9' : segment = "0011000";
+			case '-' : segment = "0111111";
+			default  : segment = "1111111";// Off
+	}
+	
+}
 /* USER CODE END 4 */
 
 #ifdef USE_FULL_ASSERT
