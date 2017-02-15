@@ -57,17 +57,46 @@ void Start7SegmentDisplayGPIO(){
 	GPIOD_init.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIOA_init.Mode = GPIO_MODE_OUTPUT_PP;
 	
-	GPIOD_init.Pull = GPIO_PULLUP;
-	GPIOA_init.Pull = GPIO_PULLUP;
+	GPIOD_init.Pull = GPIO_PULLDOWN;
+	GPIOA_init.Pull = GPIO_PULLDOWN;
 	
-	GPIOD_init.Speed = GPIO_SPEED_FAST;
-	GPIOA_init.Speed = GPIO_SPEED_FAST;
+	GPIOD_init.Speed = GPIO_SPEED_FREQ_LOW ;
+	GPIOA_init.Speed = GPIO_SPEED_FREQ_LOW;
 	
 	HAL_GPIO_Init(GPIOD, &GPIOD_init);
 	HAL_GPIO_Init(GPIOA, &GPIOA_init);
 }
 
 void DisplayTemperature(){
+	
+	char command[4][8] = {"11111101","00010010","11000000","11111001"};//-5.01
+	
+	uint16_t GPIOD_array[8] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, 
+															GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6 , GPIO_PIN_7};
+	
+	uint16_t GPIOA_array[4] = {GPIO_PIN_2, GPIO_PIN_3, GPIO_PIN_4, GPIO_PIN_5};
+	
+	
+	for(int8_t i = 0; i < 4; i++){
+		HAL_GPIO_WritePin(GPIOA, GPIOA_array[i], GPIO_PIN_SET);
+	}
+	
+	for(int8_t n = 0; n < 4; n++) {
+		
+		HAL_GPIO_WritePin(GPIOA, GPIOA_array[n], GPIO_PIN_RESET);
+		
+		for(int8_t i = 0; i < 8; i++){
+			if(command[n][i] == '1'){
+				//printf("%c", command[n][i]);
+				HAL_GPIO_WritePin(GPIOD, GPIOD_array[i], GPIO_PIN_RESET);
+			}else{
+				//printf("%c", command[n][i]);
+				HAL_GPIO_WritePin(GPIOD, GPIOD_array[i], GPIO_PIN_SET);
+			}
+
+		}
+		HAL_GPIO_WritePin(GPIOA, GPIOA_array[n], GPIO_PIN_SET);		//printf("\n");	
+	}
 }
 /* USER CODE END 1 */
 
