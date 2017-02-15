@@ -34,7 +34,7 @@
 #include "stm32f4xx_hal.h"
 #include "adc.h"
 #include "gpio.h"
-
+#include "stm32f4xx_it.h"
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -45,7 +45,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 ADC_HandleTypeDef ADC1_Handle;
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -82,18 +81,28 @@ int main(void)
 		printf("StartADCHandle status: %d\n", status);
 		//Need to add an interrupt handler
 	}
+	
+	Start7SegmentDisplayGPIO();
+	
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		status = GetTempValue(&ADC1_Handle);
-		if(status == HAL_OK){
-			printf("Success\n");
-		}else{
-			printf("Error\n");
+		printf("flag: %d\n", flag);
+		if(flag){
+			printf("flag: %d\n", flag);
+			flag = 0;
+			DisplayTemperature();
+			status = GetTempValue(&ADC1_Handle);
+			if(status == HAL_OK){
+				printf("Success\n");
+			}else{
+				printf("Error\n");
+			}
 		}
+		
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -133,7 +142,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
 
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000000000000000);
 
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
