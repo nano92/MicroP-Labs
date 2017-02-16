@@ -85,12 +85,13 @@ void Start7SegmentDisplayGPIO(){
 	celsius = 0;
 }
 
-void changeDisplay(){
+uint8_t changeDisplay(){
 	uint8_t value = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
 	if(value ^ rise_edge){
 		celsius = (value) ? !celsius : celsius;
 	}
-	rise_edge = value;	
+	rise_edge = value;
+	return celsius;
 }
 
 void DisplayTemperature(char command[4][9], char temp_alarm){
