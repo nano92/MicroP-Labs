@@ -45,6 +45,7 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
+extern char flag;
 void SysTick_Handler(void);
 void DMA2_Stream0_IRQHandler(void);
 

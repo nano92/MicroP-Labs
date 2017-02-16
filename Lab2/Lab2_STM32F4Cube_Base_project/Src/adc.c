@@ -88,8 +88,8 @@ HAL_StatusTypeDef StartADCHandle(ADC_HandleTypeDef *ADC1_Handle){
 	return status;
 }
 
-HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef *ADC1_Handle){
-	uint32_t temp_value = 0;
+HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef* ADC1_Handle, uint32_t* ADC_value){
+	//uint32_t temp_value = 0;
 	HAL_StatusTypeDef status;
 		
 	status = HAL_ADC_Start(ADC1_Handle);
@@ -104,12 +104,12 @@ HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef *ADC1_Handle){
 		return status;
 	}
 	
-	temp_value = HAL_ADC_GetValue(ADC1_Handle);
-	printf("ADC temperature value: %u\n", temp_value);
+	*ADC_value = HAL_ADC_GetValue(ADC1_Handle);
+	printf("ADC temperature value: %u\n", *ADC_value);
 	
 	status = HAL_ADC_Stop(ADC1_Handle);
 	if(status != HAL_OK){
-		printf("HAL_ADC_Stop status: %d\n", status);
+		//printf("HAL_ADC_Stop status: %d\n", status);
 		return status;
 	}
 	

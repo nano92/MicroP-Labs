@@ -52,8 +52,8 @@
 
 
 /* USER CODE BEGIN Prototypes */
-	HAL_StatusTypeDef StartADCHandle(ADC_HandleTypeDef *ADC1_Handle);
-	HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef *ADC1_Handle);
+HAL_StatusTypeDef StartADCHandle(ADC_HandleTypeDef *ADC1_Handle);
+HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef *ADC1_Handle, uint32_t *ADC_value);
 	 
 /* USER CODE END Prototypes */
 

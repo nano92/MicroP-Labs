@@ -42,17 +42,84 @@
 /* Configure GPIO                                                             */
 /*----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
-GPIO_InitTypeDef GPIO_init;
+GPIO_InitTypeDef GPIOD_init;
+GPIO_InitTypeDef GPIOB_init;
+GPIO_InitTypeDef GPIOA_init;
 
-HAL_StatusTypeDef StartGPIO(){
-	HAL_StatusTypeDef status;
-
+void Start7SegmentDisplayGPIO(){
+	
 	__HAL_RCC_GPIOD_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	__HAL_RCC_GPIOA_CLK_ENABLE();
 	
-	GPIO_init.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4
-										| GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
+	GPIOD_init.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4
+										| GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 ;
+	GPIOB_init.Pin = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
+	GPIOA_init.Pin = GPIO_PIN_0;
 	
-	HAL_GPIO_Init(GPIOD, &GPIO_init);
+	GPIOD_init.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIOB_init.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIOA_init.Mode = GPIO_MODE_IT_FALLING;
+	
+	GPIOD_init.Pull = GPIO_PULLDOWN;
+	GPIOB_init.Pull = GPIO_PULLDOWN;
+	GPIOA_init.Pull = GPIO_NOPULL; 
+	
+	GPIOD_init.Speed = GPIO_SPEED_FREQ_LOW ;
+	GPIOB_init.Speed = GPIO_SPEED_FREQ_LOW;
+	
+	HAL_GPIO_Init(GPIOD, &GPIOD_init);
+	HAL_GPIO_Init(GPIOB, &GPIOB_init);
+	HAL_GPIO_Init(GPIOA, &GPIOA_init);
+}
+
+void testButton(){
+	uint8_t value = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+	if(value == 1){
+		printf("button state: %d\n", value);
+	}
+	
+}
+
+void DisplayTemperature(char command[4][9]){
+	
+	printf("at display command[%d] = %s\n", 0, command[0]);
+	printf("at display command[%d] = %s\n", 1, command[1]);
+	printf("at display command[%d] = %s\n", 2, command[2]);
+	printf("at display command[%d] = %s\n", 3, command[3]);
+	//char command[4][8] = {"10111111","00010010","11000000","11111001"};//-5.01
+	
+	const uint16_t GPIOD_array[8] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, 
+															GPIO_PIN_4, GPIO_PIN_5 , GPIO_PIN_6, GPIO_PIN_7};
+	
+	const uint16_t GPIOB_array[4] = {GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7};
+	
+	
+	for(int8_t i = 0; i < 4; i++){
+		HAL_GPIO_WritePin(GPIOB, GPIOB_array[i], GPIO_PIN_SET);
+	}
+	
+	for(int8_t n = 0; n < 4; n++) {
+		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_RESET);
+		
+		for(int8_t i = 7; i >= 0; i--){
+			if(command[n][7 - i] == '1'){
+				//printf("%c", command[n][i]);
+				HAL_GPIO_WritePin(GPIOD, GPIOD_array[i], GPIO_PIN_RESET);
+			}else{
+				//printf("%c", command[n][i]);
+				HAL_GPIO_WritePin(GPIOD, GPIOD_array[i], GPIO_PIN_SET);
+			}
+
+		}
+		
+		while(!flag){
+			printf("Waiting\n");
+		}
+		flag = 0;
+		
+		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_SET);		//printf("\n");	
+	}
 }
 /* USER CODE END 1 */
 
