@@ -45,6 +45,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 ADC_HandleTypeDef ADC1_Handle;
+static char temp_alarm = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,7 +102,7 @@ int main(void)
 			status = GetTempValue(&ADC1_Handle, &ADC_value);
 			if(status == HAL_OK){
 				CommandGenerator(ADC_value, command);
-				DisplayTemperature(command);
+				DisplayTemperature(command, temp_alarm);
 				//printf("Success\n");
 			}else{
 				//printf("Error\n");
@@ -164,6 +165,10 @@ int16_t DegreeConverter(char temp_flag, uint32_t ADC_value){
 	// answer.
 	int16_t celsius = (((50*ADC_value - 38)/125)/1000) + 25;
 	int16_t farenheit = (celsius * 9)/5 + 32;
+	
+	//Set high temperature alarm after it gets calculated. Global variable
+	//temp_alarm is used in DisplayTemperature()
+	temp_alarm = (celsius > 31) ? 1 : 0;
 	
 	return (temp_flag == 0) ? celsius : farenheit;
 }

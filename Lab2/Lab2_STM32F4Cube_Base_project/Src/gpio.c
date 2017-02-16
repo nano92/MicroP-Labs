@@ -129,13 +129,17 @@ void DisplayTemperature(char command[4][9], char temp_alarm){
 		flag = 0;
 		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_SET);		//printf("\n");	
 	}
-	if (temp_alarm) {
+	if(temp_alarm) {
 		HAL_GPIO_TogglePin(GPIOD, LED_array[led]);
-		if (counter == 4) {
+		if (counter == 16) {
 				counter = 0;
 				led = (led == 4) ? 0 : led+1;
 		} else {
 				counter += 1;
+		}
+	}else{
+		for(int8_t i = 0; i < 4; i++){
+			HAL_GPIO_WritePin(GPIOD, LED_array[i], GPIO_PIN_RESET);
 		}
 	}
 }
