@@ -46,6 +46,7 @@ GPIO_InitTypeDef GPIOD_init;
 GPIO_InitTypeDef GPIOB_init;
 GPIO_InitTypeDef GPIOA_init;
 GPIO_InitTypeDef GPIOLED_init;
+uint8_t led, counter;
 
 void Start7SegmentDisplayGPIO(){
 	
@@ -77,6 +78,7 @@ void Start7SegmentDisplayGPIO(){
 	HAL_GPIO_Init(GPIOD, &GPIOLED_init);
 	HAL_GPIO_Init(GPIOB, &GPIOB_init);
 	HAL_GPIO_Init(GPIOA, &GPIOA_init);
+	led = 0;
 }
 
 void testButton(){
@@ -87,7 +89,7 @@ void testButton(){
 	
 }
 
-void DisplayTemperature(char command[4][9], int8_t led){
+void DisplayTemperature(char command[4][9], char temp_alarm){
 	
 	printf("at display command[%d] = %s\n", 0, command[0]);
 	printf("at display command[%d] = %s\n", 1, command[1]);
@@ -127,6 +129,12 @@ void DisplayTemperature(char command[4][9], int8_t led){
 	}
 	if (temp_alarm) {
 		HAL_GPIO_TogglePin(GPIOD, LED_array[led]);
+		if (!counter) {
+				counter = 1;
+		} else {
+				counter = 0;
+				led = (led == 4) ? 0 : led+1;
+		}
 	}
 }
 /* USER CODE END 1 */
