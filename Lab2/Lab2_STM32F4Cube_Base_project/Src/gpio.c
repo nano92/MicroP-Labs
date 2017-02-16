@@ -46,7 +46,7 @@ GPIO_InitTypeDef GPIOD_init;
 GPIO_InitTypeDef GPIOB_init;
 GPIO_InitTypeDef GPIOA_init;
 GPIO_InitTypeDef GPIOLED_init;
-uint8_t led, counter;
+uint8_t led, counter, celsius, rise_edge;
 
 void Start7SegmentDisplayGPIO(){
 	
@@ -81,14 +81,16 @@ void Start7SegmentDisplayGPIO(){
 	
 	led = 0;
 	counter = 0;
+	rise_edge = 0;
+	celsius = 0;
 }
 
-void testButton(){
+void changeDisplay(){
 	uint8_t value = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
-	if(value == 1){
-		printf("button state: %d\n", value);
+	if(value ^ rise_edge){
+		celsius = (value) ? !celsius : celsius;
 	}
-	
+	rise_edge = value;	
 }
 
 void DisplayTemperature(char command[4][9], char temp_alarm){
