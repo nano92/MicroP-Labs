@@ -78,7 +78,9 @@ void Start7SegmentDisplayGPIO(){
 	HAL_GPIO_Init(GPIOD, &GPIOLED_init);
 	HAL_GPIO_Init(GPIOB, &GPIOB_init);
 	HAL_GPIO_Init(GPIOA, &GPIOA_init);
+	
 	led = 0;
+	counter = 0;
 }
 
 void testButton(){
@@ -129,11 +131,11 @@ void DisplayTemperature(char command[4][9], char temp_alarm){
 	}
 	if (temp_alarm) {
 		HAL_GPIO_TogglePin(GPIOD, LED_array[led]);
-		if (!counter) {
-				counter = 1;
-		} else {
+		if (counter == 4) {
 				counter = 0;
 				led = (led == 4) ? 0 : led+1;
+		} else {
+				counter += 1;
 		}
 	}
 }
