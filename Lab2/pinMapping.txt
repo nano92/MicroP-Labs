@@ -9,7 +9,7 @@ F 	pin 11 	Green			PD5
 G 	pin 15  Grey			PD6
 Point  	pin 7	Red			PD7
 
-Digit1	pin 1	Green-resistor-Green	PA2
-Digit2	pin 2	Black-resitor-Gray	PA3
-Digit3	pin 6	Blue-resitor-Blue	PA4
-Digit4	pin 8	Orange-resistor-Orange	PA5
+Digit1	pin 1	Green-resistor-Green	PB4
+Digit2	pin 2	Black-resitor-Gray	PB5
+Digit3	pin 6	Blue-resitor-Blue	PB6
+Digit4	pin 8	Orange-resistor-Orange	PB7
