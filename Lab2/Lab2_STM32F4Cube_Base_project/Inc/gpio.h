@@ -41,7 +41,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-
+#include "stm32f4xx_it.h"
+	 
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -54,7 +55,8 @@ void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void Start7SegmentDisplayGPIO();
-void DisplayTemperature();
+void testButton();
+void DisplayTemperature(char command[4][9]);
 	
 /* USER CODE END Prototypes */
 

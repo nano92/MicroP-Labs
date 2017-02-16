@@ -49,7 +49,7 @@ ADC_HandleTypeDef ADC1_Handle;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-
+void CommandGenerator(uint32_t ADC_value, char command[4][9]);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
@@ -64,6 +64,8 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 	HAL_StatusTypeDef status;
+	uint32_t ADC_value = 0;
+	char command[4][9]; 
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -90,16 +92,19 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		printf("flag: %d\n", flag);
+		//printf("flag: %d\n", flag);
 		if(flag){
-			printf("flag: %d\n", flag);
 			flag = 0;
-			DisplayTemperature();
-			status = GetTempValue(&ADC1_Handle);
+			//printf("flag: %d\n", flag);
+			//DisplayTemperature();
+			//testButton();
+			status = GetTempValue(&ADC1_Handle, &ADC_value);
 			if(status == HAL_OK){
-				printf("Success\n");
+				CommandGenerator(ADC_value, command);
+				DisplayTemperature(command);
+				//printf("Success\n");
 			}else{
-				printf("Error\n");
+				//printf("Error\n");
 			}
 		}
 		
@@ -142,7 +147,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
 
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000000000000000);
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/10);
 
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
@@ -151,23 +156,71 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void decoding(char number, char* segment) {
+int16_t DegreeConverter(char temp_flag, uint32_t ADC_value){
+
+	// Because the function described decimal numbers that could only be
+	// represented in the floating point format, the equation was translated so
+	// that the calculation can be done by using integers while arriving to the
+	// answer.
+	int16_t celsius = (((50*ADC_value - 38)/125)/1000) + 25;
+	int16_t farenheit = (celsius * 9)/5 + 32;
+	
+	return (temp_flag == 0) ? celsius : farenheit;
+}
+
+void Decoding(int8_t number, char segment[9]) {
 	switch (number) {
-			case '0' : segment = "1000000";
-			case '1' : segment = "1111001";
-			case '2' : segment = "0100100";
-			case '3' : segment = "0110000";
-			case '4' : segment = "0011001";
-			case '5' : segment = "0010010";
-			case '6' : segment = "0000010";
-			case '7' : segment = "1111000";
-			case '8' : segment = "0000000";
-			case '9' : segment = "0011000";
-			case '-' : segment = "0111111";
-			default  : segment = "1111111";// Off
+			case 0 : strcpy(segment, "11000000\0"); break;
+			case 1 : strcpy(segment, "11111001\0"); break;
+			case 2 : strcpy(segment, "10100100\0"); break;
+			case 3 : strcpy(segment, "10110000\0"); break;
+			case 4 : strcpy(segment, "10011001\0"); break;
+			case 5 : strcpy(segment, "10010010\0"); break;
+			case 6 : strcpy(segment, "10000010\0"); break;
+			case 7 : strcpy(segment, "11111000\0"); break;
+			case 8 : strcpy(segment, "10000000\0"); break;
+			case 9 : strcpy(segment, "10011000\0"); break;
+			case 10 : strcpy(segment,"10111111\0"); break;
+			default  : strcpy(segment,"11111111\0");// Off
 	}
 	
 }
+
+void CommandGenerator(uint32_t ADC_value, char command[4][9]){
+	int16_t res = 0;
+	memset(command, 0, sizeof(command[0][0]) * 9 * 4);
+	
+	int16_t number = DegreeConverter(0, ADC_value);
+	int8_t dec[4] = {-1, -1, -1, 0};
+	
+	if(number < 0){
+		dec[0] = 10;
+		res = -1 * number;
+	}else{
+		res = number;
+	}
+	uint8_t i = 3;
+	
+	while(res > 10){
+		dec[i] = res % 10;
+		res = res / 10;
+		if(res < 10){
+			dec[i - 1] = res;
+		}else{
+			i--;
+		}
+	}
+	char cmd[9];
+		
+	for(int8_t i = 0; i < 4; i++) {
+		//memset(cmd, 0, 8);
+		Decoding(dec[i],cmd);
+		strcpy(command[i],cmd);
+		printf("cmd = %s\n", cmd);
+	}
+	printf("command[%d] = %s\n", 0, command[0]);
+}
+
 /* USER CODE END 4 */
 
 #ifdef USE_FULL_ASSERT
