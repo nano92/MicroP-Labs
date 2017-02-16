@@ -56,7 +56,7 @@ void MX_GPIO_Init(void);
 /* USER CODE BEGIN Prototypes */
 void Start7SegmentDisplayGPIO();
 void testButton();
-void DisplayTemperature(char command[4][9]);
+void DisplayTemperature(char command[4][9],int8_t led);
 	
 /* USER CODE END Prototypes */
 
