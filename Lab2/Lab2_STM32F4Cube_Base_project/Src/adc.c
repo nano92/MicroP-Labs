@@ -49,7 +49,7 @@ HAL_StatusTypeDef StartADCHandle(ADC_HandleTypeDef *ADC1_Handle){
 	
 	ADC1_Handle->Instance = ADC1;
 	ADC1_Handle->Init = ADC1_init;
-	ADC1_Handle->Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV8;
+	ADC1_Handle->Init.ClockPrescaler = 49200;
 	ADC1_Handle->Init.Resolution = ADC_RESOLUTION12b;
 	ADC1_Handle->Init.DataAlign = ADC_DATAALIGN_LEFT;
 	ADC1_Handle->Init.ScanConvMode = DISABLE;
@@ -105,7 +105,7 @@ HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef* ADC1_Handle, uint32_t* ADC_val
 	}
 	
 	*ADC_value = HAL_ADC_GetValue(ADC1_Handle);
-	printf("ADC temperature value: %u\n", *ADC_value);
+	//printf("ADC temperature value: %u\n", *ADC_value);
 	
 	status = HAL_ADC_Stop(ADC1_Handle);
 	if(status != HAL_OK){
