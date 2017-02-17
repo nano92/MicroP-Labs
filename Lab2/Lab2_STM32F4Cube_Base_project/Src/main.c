@@ -51,6 +51,7 @@ static char temp_alarm = 0;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void CommandGenerator(uint32_t ADC_value, char command[4][9]);
+uint32_t filter(uint32_t *data);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
@@ -91,6 +92,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	uint32_t data[5] = {0,0,0,0,0};
   while (1)
   {
 		//printf("flag: %d\n", flag);
@@ -100,6 +102,8 @@ int main(void)
 			//DisplayTemperature();
 			//testButton();
 			status = GetTempValue(&ADC1_Handle, &ADC_value);
+			data[0] = ADC_value;
+			ADC_value = filter(data);
 			if(status == HAL_OK){
 				CommandGenerator(ADC_value, command);
 				DisplayTemperature(command, temp_alarm);
@@ -224,6 +228,14 @@ void CommandGenerator(uint32_t ADC_value, char command[4][9]){
 		printf("cmd = %s\n", cmd);
 	}
 	printf("command[%d] = %s\n", 0, command[0]);
+}
+
+uint32_t filter(uint32_t data[5]) {
+	uint32_t filter = (10*(data[0]+data[4])+15*(data[1]+data[3])+ 50*data[2])/100;
+	for(uint8_t i = 4; i >= 1; i--) {
+			data[i] = data[i-1];
+	}
+	return filter;
 }
 
 /* USER CODE END 4 */
