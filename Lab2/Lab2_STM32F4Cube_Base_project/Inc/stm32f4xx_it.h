@@ -46,7 +46,7 @@
 /* Exported functions ------------------------------------------------------- */
 
 
-extern char flag;
+extern char TICK_FLAG;
 	 
 void SysTick_Handler(void);
 void DMA2_Stream0_IRQHandler(void);

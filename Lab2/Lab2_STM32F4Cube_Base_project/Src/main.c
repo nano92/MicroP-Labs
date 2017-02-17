@@ -174,14 +174,14 @@ void SystemClock_Config(void)
  */
 float DegreeConverter(uint32_t ADC_value){
 	uint8_t temp_flag = changeDisplay();
-
+	
 	float celsius = (((50.0*ADC_value - 38.0)/125.0)/1000.0) + 25.0;
 	float farenheit = (celsius * 9.0)/5.0 + 32.0;
 	
 	//Set high temperature alarm after it gets calculated. Global variable
 	//temp_alarm is used in DisplayTemperature()
 	temp_alarm = (celsius >= 40.0) ? 1 : 0;
-	
+
 	return (temp_flag == 0) ? celsius : farenheit;
 }
 
