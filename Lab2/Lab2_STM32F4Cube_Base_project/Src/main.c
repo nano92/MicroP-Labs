@@ -62,11 +62,11 @@ void CommandGenerator(uint32_t ADC_value, char command[4][9]);
 
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
 	HAL_StatusTypeDef status;
 	uint32_t ADC_value = 0;
-	char command[4][9]; 
+	char command[4][9];
+	uint32_t ADC_values[5];
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -157,8 +157,9 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-int16_t DegreeConverter(char temp_flag, uint32_t ADC_value){
-
+int16_t DegreeConverter(uint32_t ADC_value){
+	uint8_t temp_flag = changeDisplay();
+	
 	// Because the function described decimal numbers that could only be
 	// represented in the floating point format, the equation was translated so
 	// that the calculation can be done by using integers while arriving to the
@@ -195,7 +196,7 @@ void CommandGenerator(uint32_t ADC_value, char command[4][9]){
 	int16_t res = 0;
 	memset(command, 0, sizeof(command[0][0]) * 9 * 4);
 	
-	int16_t number = DegreeConverter(0, ADC_value);
+	int16_t number = DegreeConverter(ADC_value);
 	int8_t dec[4] = {-1, -1, -1, 0};
 	
 	if(number < 0){
