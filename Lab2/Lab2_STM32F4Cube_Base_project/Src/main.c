@@ -98,12 +98,8 @@ int main(void)
 	uint32_t data[5] = {0,0,0,0,0};
   while (1)
   {
-		//printf("flag: %d\n", flag);
 		if(TICK_FLAG){
 			TICK_FLAG = 0;
-			//printf("flag: %d\n", flag);
-			//DisplayTemperature();
-			//testButton();
 			status = GetTempValue(&ADC1_Handle, &ADC_value);
 			data[0] = ADC_value;
 			ADC_value = filter(data);
@@ -155,7 +151,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
 
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/10);
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/100);
 
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
@@ -180,7 +176,7 @@ float DegreeConverter(uint32_t ADC_value){
 	
 	//Set high temperature alarm after it gets calculated. Global variable
 	//temp_alarm is used in DisplayTemperature()
-	temp_alarm = (celsius >= 40.0) ? 1 : 0;
+	temp_alarm = (celsius > 30.0) ? 1 : 0;
 
 	return (temp_flag == 0) ? celsius : farenheit;
 }
@@ -253,7 +249,6 @@ void CommandGenerator(uint32_t ADC_value, char command[4][9]){
 		strcpy(command[i],cmd);
 		
 	}
-	printf("command[%d] = %s\n", 0, command[0]);
 }
 
 /* Function : filter

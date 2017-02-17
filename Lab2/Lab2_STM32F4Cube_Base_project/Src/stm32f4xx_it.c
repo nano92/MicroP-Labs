@@ -57,12 +57,7 @@ void SysTick_Handler(void)
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
 	
-	if(counter == 4){
-		TICK_FLAG = 1;
-		counter = 0;
-	}else{
-		counter++;
-	}
+	TICK_FLAG = 1;
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
   /* USER CODE END SysTick_IRQn 1 */

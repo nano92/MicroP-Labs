@@ -47,7 +47,7 @@ GPIO_InitTypeDef GPIOB_init;
 GPIO_InitTypeDef GPIOA_init;
 GPIO_InitTypeDef GPIOLED_init;
 
-uint8_t led = 0, counter = 0, celsius = 0, rise_edge = 0;
+uint8_t led = 0, temp_counter = 0, celsius = 0, rise_edge = 0;
 
 void Start7SegmentDisplayGPIO(){
 	
@@ -102,12 +102,6 @@ uint8_t changeDisplay(){
 
 void DisplayTemperature(char command[4][9], char temp_alarm){
 	
-	printf("at display command[%d] = %s\n", 0, command[0]);
-	printf("at display command[%d] = %s\n", 1, command[1]);
-	printf("at display command[%d] = %s\n", 2, command[2]);
-	printf("at display command[%d] = %s\n", 3, command[3]);
-	//char command[4][8] = {"10111111","00010010","11000000","11111001"};//-5.01
-	
 	const uint16_t GPIOD_array[8] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, 
 															GPIO_PIN_4, GPIO_PIN_5 , GPIO_PIN_6, GPIO_PIN_7};
 	
@@ -123,7 +117,7 @@ void DisplayTemperature(char command[4][9], char temp_alarm){
 	for(int8_t n = 0; n < 4; n++) {
 		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_RESET);
 		
-		while(!TICK_FLAG){
+		for(uint16_t i = 1400; i > 0; i--){
 			for(int8_t i = 7; i >= 0; i--){
 				if(command[n][7 - i] == '1'){
 					//printf("%c", command[n][i]);
@@ -134,18 +128,16 @@ void DisplayTemperature(char command[4][9], char temp_alarm){
 				}
 			}
 		}	
-		TICK_FLAG = 0;
-		
 		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_SET);		//printf("\n");	
 	}
 	
 	if(temp_alarm){
 		HAL_GPIO_TogglePin(GPIOD, LED_array[led]);
-		if (counter == 16) {
-				counter = 0;
+		if (temp_counter == 16) {
+				temp_counter = 0;
 				led = (led == 4) ? 0 : led+1;
 		} else {
-				counter += 1;
+				temp_counter += 1;
 		}
 	}else{
 		for(int8_t i = 0; i < 4; i++){
