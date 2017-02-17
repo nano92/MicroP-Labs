@@ -41,6 +41,7 @@
 
 /* External variables --------------------------------------------------------*/
 char TICK_FLAG = 0;
+static uint8_t counter = 0;
 /******************************************************************************/
 /*            Cortex-M4 Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
@@ -55,7 +56,13 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
-	TICK_FLAG = 1;
+	
+	if(counter == 4){
+		TICK_FLAG = 1;
+		counter = 0;
+	}else{
+		counter++;
+	}
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
   /* USER CODE END SysTick_IRQn 1 */
