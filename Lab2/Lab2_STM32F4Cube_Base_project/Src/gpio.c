@@ -46,43 +46,49 @@ GPIO_InitTypeDef GPIOD_init;
 GPIO_InitTypeDef GPIOB_init;
 GPIO_InitTypeDef GPIOA_init;
 GPIO_InitTypeDef GPIOLED_init;
-uint8_t led, counter, celsius, rise_edge;
+
+uint8_t led = 0, counter = 0, celsius = 0, rise_edge = 0;
 
 void Start7SegmentDisplayGPIO(){
 	
 	__HAL_RCC_GPIOD_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
-	__HAL_RCC_GPIOA_CLK_ENABLE();
+	
 	
 	GPIOD_init.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4
 										| GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 ;
 	GPIOB_init.Pin = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
-	GPIOLED_init.Pin = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
-	GPIOA_init.Pin = GPIO_PIN_0;
-	
+		
 	GPIOD_init.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIOB_init.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIOLED_init.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIOA_init.Mode = GPIO_MODE_IT_FALLING;
-	
+		
 	GPIOD_init.Pull = GPIO_PULLDOWN;
 	GPIOB_init.Pull = GPIO_PULLDOWN;
-	GPIOLED_init.Pull = GPIO_PULLDOWN;
-	GPIOA_init.Pull = GPIO_NOPULL; 
-	
+		
 	GPIOD_init.Speed = GPIO_SPEED_FREQ_LOW ;
 	GPIOB_init.Speed = GPIO_SPEED_FREQ_LOW;
-	GPIOLED_init.Speed = GPIO_SPEED_FAST;
 	
 	HAL_GPIO_Init(GPIOD, &GPIOD_init);
-	HAL_GPIO_Init(GPIOD, &GPIOLED_init);
 	HAL_GPIO_Init(GPIOB, &GPIOB_init);
-	HAL_GPIO_Init(GPIOA, &GPIOA_init);
+}
+
+void StartButtonGPIO(){
+	__HAL_RCC_GPIOA_CLK_ENABLE();
 	
-	led = 0;
-	counter = 0;
-	rise_edge = 0;
-	celsius = 0;
+	GPIOA_init.Pin = GPIO_PIN_0;
+	GPIOA_init.Mode = GPIO_MODE_IT_FALLING;
+	GPIOA_init.Pull = GPIO_NOPULL;
+	
+	HAL_GPIO_Init(GPIOA, &GPIOA_init);
+}
+
+void StartLEDGPIO(){
+	GPIOLED_init.Pin = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
+	GPIOLED_init.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIOLED_init.Pull = GPIO_PULLDOWN;
+	GPIOLED_init.Speed = GPIO_SPEED_FAST;
+	
+	HAL_GPIO_Init(GPIOD, &GPIOLED_init);
 }
 
 uint8_t changeDisplay(){
@@ -114,10 +120,10 @@ void DisplayTemperature(char command[4][9], char temp_alarm){
 		HAL_GPIO_WritePin(GPIOB, GPIOB_array[i], GPIO_PIN_SET);
 	}
 		
-		
 	for(int8_t n = 0; n < 4; n++) {
 		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_RESET);
-		while(!flag){
+		
+		while(!TICK_FLAG){
 			for(int8_t i = 7; i >= 0; i--){
 				if(command[n][7 - i] == '1'){
 					//printf("%c", command[n][i]);
@@ -126,13 +132,14 @@ void DisplayTemperature(char command[4][9], char temp_alarm){
 					//printf("%c", command[n][i]);
 					HAL_GPIO_WritePin(GPIOD, GPIOD_array[i], GPIO_PIN_SET);
 				}
-
 			}
 		}	
-		flag = 0;
+		TICK_FLAG = 0;
+		
 		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_SET);		//printf("\n");	
 	}
-	if(temp_alarm) {
+	
+	if(temp_alarm){
 		HAL_GPIO_TogglePin(GPIOD, LED_array[led]);
 		if (counter == 16) {
 				counter = 0;

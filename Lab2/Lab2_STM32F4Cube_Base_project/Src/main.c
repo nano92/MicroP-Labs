@@ -51,6 +51,8 @@ static char temp_alarm = 0;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void CommandGenerator(uint32_t ADC_value, char command[4][9]);
+float DegreeConverter(uint32_t ADC_value);
+void Decoding(int8_t number, char segment[9]);
 uint32_t filter(uint32_t *data);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -87,7 +89,8 @@ int main(void)
 	}
 	
 	Start7SegmentDisplayGPIO();
-	
+	StartButtonGPIO();
+	StartLEDGPIO();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -96,8 +99,8 @@ int main(void)
   while (1)
   {
 		//printf("flag: %d\n", flag);
-		if(flag){
-			flag = 0;
+		if(TICK_FLAG){
+			TICK_FLAG = 0;
 			//printf("flag: %d\n", flag);
 			//DisplayTemperature();
 			//testButton();
@@ -161,24 +164,23 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-int16_t DegreeConverter(uint32_t ADC_value){
+float DegreeConverter(uint32_t ADC_value){
 	uint8_t temp_flag = changeDisplay();
-	
 	// Because the function described decimal numbers that could only be
 	// represented in the floating point format, the equation was translated so
 	// that the calculation can be done by using integers while arriving to the
 	// answer.
-	int16_t celsius = (((50*ADC_value - 38)/125)/1000) + 25;
-	int16_t farenheit = (celsius * 9)/5 + 32;
+	float celsius = (((50.0*ADC_value - 38.0)/125.0)/1000.0) + 25.0;
+	float farenheit = (celsius * 9.0)/5.0 + 32.0;
 	
 	//Set high temperature alarm after it gets calculated. Global variable
 	//temp_alarm is used in DisplayTemperature()
-	temp_alarm = (celsius > 31) ? 1 : 0;
+	temp_alarm = (celsius >= 31.9) ? 1 : 0;
 	
 	return (temp_flag == 0) ? celsius : farenheit;
 }
 
-void Decoding(int8_t number, char segment[9]) {
+void Decoding(int8_t number, char segment[9]){
 	switch (number) {
 			case 0 : strcpy(segment, "11000000\0"); break;
 			case 1 : strcpy(segment, "11111001\0"); break;
@@ -200,8 +202,12 @@ void CommandGenerator(uint32_t ADC_value, char command[4][9]){
 	int16_t res = 0;
 	memset(command, 0, sizeof(command[0][0]) * 9 * 4);
 	
-	int16_t number = DegreeConverter(ADC_value);
+	float number = DegreeConverter(ADC_value);
 	int8_t dec[4] = {-1, -1, -1, 0};
+	
+	//Need to show only one decimal, then temperature value is multiplied by 10 
+	//and cast to be an integer
+	number = number * 10;
 	
 	if(number < 0){
 		dec[0] = 10;
@@ -225,8 +231,11 @@ void CommandGenerator(uint32_t ADC_value, char command[4][9]){
 	for(int8_t i = 0; i < 4; i++) {
 		//memset(cmd, 0, 8);
 		Decoding(dec[i],cmd);
+		if(i == 2){
+			cmd[0] = '0';
+		}
 		strcpy(command[i],cmd);
-		printf("cmd = %s\n", cmd);
+		
 	}
 	printf("command[%d] = %s\n", 0, command[0]);
 }

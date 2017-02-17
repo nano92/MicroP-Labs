@@ -40,7 +40,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-char flag = 0;
+char TICK_FLAG = 0;
 /******************************************************************************/
 /*            Cortex-M4 Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
@@ -55,7 +55,7 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
-	flag = 1;
+	TICK_FLAG = 1;
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
   /* USER CODE END SysTick_IRQn 1 */
