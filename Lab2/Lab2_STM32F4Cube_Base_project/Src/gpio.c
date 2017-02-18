@@ -42,6 +42,7 @@
 /* Configure GPIO                                                             */
 /*----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
+// Assigning general variables for the GPIO fucntions
 GPIO_InitTypeDef GPIOD_init;
 GPIO_InitTypeDef GPIOB_init;
 GPIO_InitTypeDef GPIOA_init;
@@ -49,6 +50,9 @@ GPIO_InitTypeDef GPIOLED_init;
 
 uint8_t led = 0, temp_counter = 0, celsius = 0, rise_edge = 0;
 
+/* Function: Start7SegmentDisplayGPIO
+ * Description: Initialises the GPIO pins responsible for the 4 digits 7 segment display
+ */
 void Start7SegmentDisplayGPIO(){
 	
 	__HAL_RCC_GPIOD_CLK_ENABLE();
@@ -72,6 +76,10 @@ void Start7SegmentDisplayGPIO(){
 	HAL_GPIO_Init(GPIOB, &GPIOB_init);
 }
 
+/* Function: StartButtonGPIO
+ * Description: Initialises the GPIO pin responsible for the user button that would change the temperature measurement from 
+ * Celcius to Farenheit.
+ */
 void StartButtonGPIO(){
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	
@@ -82,6 +90,9 @@ void StartButtonGPIO(){
 	HAL_GPIO_Init(GPIOA, &GPIOA_init);
 }
 
+/* Function: StartLEDGPIO
+ * Description: Initialises the GPIO pins responsible for the 4 LED used for the temperature alarm
+ */
 void StartLEDGPIO(){
 	GPIOLED_init.Pin = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
 	GPIOLED_init.Mode = GPIO_MODE_OUTPUT_PP;
@@ -91,6 +102,10 @@ void StartLEDGPIO(){
 	HAL_GPIO_Init(GPIOD, &GPIOLED_init);
 }
 
+/* Function: changeDisplay
+ * Returns : uint8_t celcius
+ * Description: Changes the flag for displaying either celcius(0) or farenheit(1) when the button is pressed
+ */
 uint8_t changeDisplay(){
 	uint8_t value = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
 	if(value ^ rise_edge){
@@ -100,6 +115,11 @@ uint8_t changeDisplay(){
 	return celsius;
 }
 
+/* Function: DisplayTemperature
+ * Input   : char command[4][9], char temp_alarm
+ * Description: function in charge of displaying the commands through the 4 digit 7 segment display and displaying the LED alarm signal 
+ * ones temp_alarm is high.
+ */
 void DisplayTemperature(char command[4][9], char temp_alarm){
 	
 	const uint16_t GPIOD_array[8] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, 
@@ -109,7 +129,7 @@ void DisplayTemperature(char command[4][9], char temp_alarm){
 	
 	const uint16_t GPIOB_array[4] = {GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7};
 	
-	
+	// Displaying the command in 7 segment display
 	for(int8_t i = 0; i < 4; i++){
 		HAL_GPIO_WritePin(GPIOB, GPIOB_array[i], GPIO_PIN_SET);
 	}
@@ -131,6 +151,7 @@ void DisplayTemperature(char command[4][9], char temp_alarm){
 		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_SET);		//printf("\n");	
 	}
 	
+	// Takes care of dislpaying the alarm
 	if(temp_alarm){
 		HAL_GPIO_TogglePin(GPIOD, LED_array[led]);
 		if (temp_counter == 16) {
