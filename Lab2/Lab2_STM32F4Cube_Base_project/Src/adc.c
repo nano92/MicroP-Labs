@@ -41,6 +41,11 @@ ADC_InitTypeDef ADC1_init;
 ADC_ChannelConfTypeDef channel_config;
 ADC_MultiModeTypeDef multi_mode_config;
 
+/* Function: StartADCHandle
+ * Input   : ADC_HandleTypeDef *ADC1_Handle
+ * Returns : HAL_StatusTypeDef status
+ * Description : initiates the ADC and set ups the channel
+ */
 HAL_StatusTypeDef StartADCHandle(ADC_HandleTypeDef *ADC1_Handle){
 	HAL_StatusTypeDef status;
 	
@@ -88,6 +93,13 @@ HAL_StatusTypeDef StartADCHandle(ADC_HandleTypeDef *ADC1_Handle){
 	return status;
 }
 
+/* Function: GetTempValue
+ * Input   : ADC_HandleTypeDef *ADC1_Handle
+ * Output  : uint32_t* ADC_value
+ * Returns : HAL_StatusTypeDef status
+ * Description : Reads the value obtained in the ADC ADC1_Handle and stores it in ADC_value so that later 
+ * function may use this value.
+ */
 HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef* ADC1_Handle, uint32_t* ADC_value){
 	//uint32_t temp_value = 0;
 	HAL_StatusTypeDef status;
