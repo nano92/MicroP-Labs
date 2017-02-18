@@ -63,6 +63,10 @@ uint32_t filter(uint32_t *data);
 
 /* USER CODE END 0 */
 
+/* Function: main
+ * Description: Runs the entire process for reading the temperature of the chip and disaplying
+ * the result in a 4 digits 7 segment display. 
+ */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
