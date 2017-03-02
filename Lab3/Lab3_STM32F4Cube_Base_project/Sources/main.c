@@ -14,6 +14,7 @@
 #include "lis3dsh.h"
 
 /* Private variables ---------------------------------------------------------*/
+LIS3DSH_InitTypeDef LIS3DSH_InitStruct;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config	(void);
@@ -28,8 +29,10 @@ int main(void)
   SystemClock_Config();
 	
   /* Initialize all configured peripherals */
-
+	LIS3DSH_Init(&LIS3DSH_InitStruct);
+	StartKeypadGPIO();
 	while (1){
+		test_keypad();
 	}
 }
 

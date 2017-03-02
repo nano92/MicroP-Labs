@@ -11,6 +11,7 @@
 #define SUPPORTING_FUNCTIONS_H
 
 #include "stdint.h"
+#include "gpio.h"
 #include <stdio.h>
 
 //Add as many definitions as you see necessary. 
