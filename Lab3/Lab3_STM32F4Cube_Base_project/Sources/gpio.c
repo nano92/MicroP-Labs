@@ -61,41 +61,55 @@ void StartKeypadGPIO(){
 	//__HAL_RCC_GPIOB_CLK_ENABLE();
 	
 	
-	GPIO_Row_init.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;
-	GPIO_Col_init.Pin = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
+	//GPIO_Row_init.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;
+	GPIO_Col_init.Pin = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
 	//GPIOB_init.Pin = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
 		
-	GPIO_Row_init.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_Col_init.Mode = GPIO_MODE_INPUT;
+	//GPIO_Row_init.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_Col_init.Mode = GPIO_MODE_IT_FALLING;
 		
-	GPIO_Row_init.Pull = GPIO_NOPULL;
+	//GPIO_Row_init.Pull = GPIO_NOPULL;
 	GPIO_Col_init.Pull = GPIO_PULLUP;
 		
 	//GPIOD_init.Speed = GPIO_SPEED_FREQ_LOW ;
 	//GPIOB_init.Speed = GPIO_SPEED_FREQ_LOW;
+	//GPIO_Col_init.Speed = GPIO_SPEED_FREQ_LOW;
 	
-	HAL_GPIO_Init(GPIOD, &GPIO_Row_init);
+	//HAL_GPIO_Init(GPIOD, &GPIO_Row_init);
 	HAL_GPIO_Init(GPIOD, &GPIO_Col_init);
 	
-	const uint16_t Row[4] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3};
-	for(int8_t i = 0; i < 4; i++){
-		HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_SET);
-	}
 }
 
 void test_keypad(){
 	
 	const uint16_t Col[4] = {GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7};
-	
+	const uint16_t Row[4] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3};
 	int8_t col_index = -1;
 	
-	for(int8_t i = 0; i < 4; i++) {
-		int8_t value = HAL_GPIO_ReadPin(GPIOD, Col[i]);
-		col_index = (value == 1) ? i : -1;
-		printf("col_index = %d\n",col_index);
+	for(int8_t i = 0; i < 4; i++){
+		HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_SET);
 	}
-	if(col_index > -1){
-		printf("col_index = %d\n", col_index);
+	
+	for(int8_t i = 0; i < 4; i++){
+		HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_RESET);
+		
+		for(uint16_t d = 9000; d > 0; d--){
+			for(int8_t i = 0; i < 4; i++){
+				int8_t value = HAL_GPIO_ReadPin(GPIOD, Col[i]);
+				col_index = (value == 0) ? i : -1;
+				if(col_index != -1){
+					break;
+				}
+			}
+			if(col_index != -1){
+					break;
+				}
+		}
+		if(col_index >= 0){
+			printf("col_index = %d\n", col_index);
+		}
+		
+		HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_SET);
 	}
 }
 /* Function: StartButtonGPIO

@@ -15,7 +15,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 LIS3DSH_InitTypeDef LIS3DSH_InitStruct;
-
+static const uint16_t Col[4] = {GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8, GPIO_PIN_9};
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config	(void);
 
@@ -24,15 +24,24 @@ int main(void)
   /* MCU Configuration----------------------------------------------------------*/
 
   HAL_Init();
-
+	
   /* Configure the system clock */
   SystemClock_Config();
-	
   /* Initialize all configured peripherals */
+	HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+	HAL_NVIC_SetPriority(EXTI9_5_IRQn, 2, 3);
+	
 	LIS3DSH_Init(&LIS3DSH_InitStruct);
 	StartKeypadGPIO();
 	while (1){
-		test_keypad();
+		if(HAL_GPIO_ReadPin(GPIOD, Col[0]) == 1 ||
+				HAL_GPIO_ReadPin(GPIOD, Col[1]) == 1 ||
+				HAL_GPIO_ReadPin(GPIOD, Col[2]) == 1 ||
+				HAL_GPIO_ReadPin(GPIOD, Col[3]) == 1){
+				
+			HAL_NVIC_SetPendingIRQ(EXTI9_5_IRQn);
+		}
+		//test_keypad();
 	}
 }
 

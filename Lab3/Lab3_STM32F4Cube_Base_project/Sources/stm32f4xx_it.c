@@ -53,6 +53,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+static const uint16_t Col[4] = {GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8, GPIO_PIN_9};
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -172,7 +173,26 @@ void SysTick_Handler(void)
 /*void PPP_IRQHandler(void)
 {
 }*/
-
+void EXTI9_5_IRQHandler(void){
+	uint16_t count = 0;
+	HAL_NVIC_ClearPendingIRQ(EXTI9_5_IRQn);
+	
+	//for(uint16_t i = 0; i < 4; i++){
+		//for(uint16_t d = 200; d > 0; d--){
+			//count++;
+			//if(HAL_GPIO_ReadPin(GPIOD, Col[0]) == 1){
+				//printf("Hello");
+				HAL_GPIO_EXTI_IRQHandler(Col[0]); //| Col[1] | Col[2] | Col[3]);
+				//break;
+			//}
+			//printf("count = %d\n", count);
+		//}
+	//}
+	//HAL_TIM_Base_Start_IT
+}
+void HAL_GPIO_EXTI_Callback(uint16_t col_index){
+	printf("col_index = %d\n", col_index);
+}
 /**
   * @}
   */ 
