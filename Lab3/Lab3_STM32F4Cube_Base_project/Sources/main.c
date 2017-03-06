@@ -15,6 +15,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 LIS3DSH_InitTypeDef LIS3DSH_InitStruct;
+LIS3DSH_DRYInterruptConfigTypeDef LIS3DSH_IntConfigStruct;
 static const uint16_t Col[4] = {GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8, GPIO_PIN_9};
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config	(void);
@@ -32,6 +33,10 @@ int main(void)
 	HAL_NVIC_SetPriority(EXTI9_5_IRQn, 2, 3);
 	
 	LIS3DSH_Init(&LIS3DSH_InitStruct);
+	LIS3DSH_DataRateCmd(LIS3DSH_DATARATE_25);
+	LIS3DSH_InterruptConfigStruct(&LIS3DSH_IntConfigStruct);
+	LIS3DSH_DataReadyInterruptConfig(&LIS3DSH_IntConfigStruct);
+	
 	StartKeypadGPIO();
 	while (1){
 		if(HAL_GPIO_ReadPin(GPIOD, Col[0]) == 1 ||

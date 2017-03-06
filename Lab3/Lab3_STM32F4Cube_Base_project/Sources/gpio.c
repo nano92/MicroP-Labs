@@ -75,7 +75,7 @@ void StartKeypadGPIO(){
 	//GPIOB_init.Speed = GPIO_SPEED_FREQ_LOW;
 	//GPIO_Col_init.Speed = GPIO_SPEED_FREQ_LOW;
 	
-	//HAL_GPIO_Init(GPIOD, &GPIO_Row_init);
+	//HAL_GPIO_Init(GPIOD, &GPIO_Row_init); 
 	HAL_GPIO_Init(GPIOD, &GPIO_Col_init);
 	
 }
