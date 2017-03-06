@@ -8,7 +8,6 @@
   ******************************************************************************
   */
 #include "supporting_functions.h"
-
 /**
    * @brief A function used to relay information (PRINTF) that a specific error has occured 
 	 * and gets the system into infinite loop. User can modify the output error message
@@ -49,4 +48,10 @@ void Error_Handler			(uint16_t error_code){
 		default: printf ("ERROR: AN ERROR OCCURED \n");
 		break;
 	}
+}
+
+void LIS3DSH_InterruptConfigStruct(LIS3DSH_DRYInterruptConfigTypeDef *LIS3DSH_IntConfigStruct){
+	LIS3DSH_IntConfigStruct->Dataready_Interrupt = LIS3DSH_DATA_READY_INTERRUPT_ENABLED;
+	LIS3DSH_IntConfigStruct->Interrupt_signal = LIS3DSH_ACTIVE_HIGH_INTERRUPT_SIGNAL;
+	LIS3DSH_IntConfigStruct->Interrupt_type = LIS3DSH_INTERRUPT_REQUEST_PULSED;
 }

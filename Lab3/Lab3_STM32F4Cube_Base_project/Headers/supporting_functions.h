@@ -12,6 +12,7 @@
 
 #include "stdint.h"
 #include "gpio.h"
+#include "lis3dsh.h"
 #include <stdio.h>
 
 //Add as many definitions as you see necessary. 
@@ -26,6 +27,6 @@
 #define EXTI_SPI1_FAIL				((uint16_t) 5)
 
 void Error_Handler						(uint16_t error_code);
-
+void LIS3DSH_InterruptConfigStruct(LIS3DSH_DRYInterruptConfigTypeDef *LIS3DSH_IntConfigStruct);
 
 #endif
