@@ -42,7 +42,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_it.h"
-	 
+#include "stdint.h"
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -54,8 +54,11 @@
 void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+void InitReadButton();
+void DeInitReadButton();
 void StartKeypadGPIO();
-void test_keypad();
+void DeInitKeypadGPIO();
+uint8_t test_keypad();
 void StartButtonGPIO();
 void StartLEDGPIO();
 //uint8_t changeDisplay();
