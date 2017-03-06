@@ -96,10 +96,12 @@ void test_keypad(){
 		for(int8_t i = 0; i < 4; i++){
 				col_value[i] = HAL_GPIO_ReadPin(GPIOD, Col[i]);
 	}
-	
-	if (Col[0] && Col[1] && Col[2] && Col[2]) {
+	if (col_value[0] || col_value[1] || col_value[2] || col_value[3]) {
 		for(int8_t i = 0; i < 4; i++){
 			HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_SET);
+		}
+		for(int8_t i = 0; i < 4; i++){
+			HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_RESET);
 
 			for(int8_t i = 0; i < 4; i++){
 				int8_t value = HAL_GPIO_ReadPin(GPIOD, Col[i]);
