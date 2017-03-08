@@ -49,6 +49,9 @@ GPIO_InitTypeDef GPIO_Col_init;
 GPIO_InitTypeDef GPIO_Col_Hash;
 GPIO_InitTypeDef GPIO_Row_Hash;
 
+static const uint16_t Row[4] = {GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, GPIO_PIN_4};
+static const uint16_t Col[4] = {GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8};
+
 GPIO_InitTypeDef GPIOB_init;
 GPIO_InitTypeDef GPIOA_init;
 GPIO_InitTypeDef GPIOLED_init; 
@@ -79,7 +82,9 @@ void InitReadButton(){
 }
 
 void DeInitReadButton(){
-	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_4 | GPIO_PIN_8);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_SET);
+	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_4);
+	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_8);
 }
 void StartKeypadGPIO(){
 	
@@ -108,11 +113,12 @@ void StartKeypadGPIO(){
 	
 }
 void DeInitKeypadGPIO(){
-	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 |GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8);
+	for(uint8_t i = 0; i < 4; i++){
+		HAL_GPIO_DeInit(GPIOD, Row[i]);
+		HAL_GPIO_DeInit(GPIOD, Col[i]);
+	}
 }
 uint8_t test_keypad(){
-	const uint16_t Row[4] = {GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, GPIO_PIN_4};
-	const uint16_t Col[4] = {GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8};
 	int8_t col_index = -1;
 	int8_t row_index = -1;
 //	int8_t value = -1;
@@ -147,9 +153,8 @@ uint8_t test_keypad(){
 			HAL_GPIO_WritePin(GPIOD, Row[j], GPIO_PIN_SET);
 		}
 	} 
-	while(rise_edge) {
-		rise_edge = (HAL_GPIO_ReadPin(GPIOD, Col[col_index]) == GPIO_PIN_RESET);
-	}
+	
+	KeyBouncingDelay(GPIOD, Col[col_index], GPIO_PIN_RESET, rise_edge);
 	
 	if(col_index == 3 && row_index == 3){
 		return 1;

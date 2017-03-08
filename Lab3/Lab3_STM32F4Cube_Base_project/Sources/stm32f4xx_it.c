@@ -190,7 +190,10 @@ void EXTI9_5_IRQHandler(void){
 	//HAL_TIM_Base_Start_IT
 }
 void HAL_GPIO_EXTI_Callback(uint16_t col_index){
-	printf("col_index = %d\n", col_index);
+	uint8_t rise_edge = 1;
+	while(rise_edge) {
+		rise_edge = (HAL_GPIO_ReadPin(GPIOD, col_index) == GPIO_PIN_RESET);
+	}
 	INPUT_FLAG = 1;
 }
 /**
