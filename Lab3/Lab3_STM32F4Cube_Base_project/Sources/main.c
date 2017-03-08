@@ -25,21 +25,34 @@ int main(void)
   /* MCU Configuration----------------------------------------------------------*/
 
   HAL_Init();
-	
   /* Configure the system clock */
   SystemClock_Config();
-  /* Initialize all configured peripherals */
-	
-	Init_NVIC_Interrupt(EXTI9_5_IRQn, 2, 3, 2);
-	InitReadButton();
+  /* Initialize all configured peripherals */	
+	//InitAccGPIO();
+	__HAL_RCC_GPIOE_CLK_ENABLE();
+	LIS3DSH_InitStruct.Power_Mode_Output_DataRate = LIS3DSH_DATARATE_25;
+	LIS3DSH_InitStruct.Axes_Enable = LIS3DSH_XYZ_ENABLE;
+	LIS3DSH_InitStruct.Continous_Update = LIS3DSH_ContinousUpdate_Disabled;
+	LIS3DSH_InitStruct.Full_Scale = LIS3DSH_FULLSCALE_2;
+	LIS3DSH_InitStruct.AA_Filter_BW = LIS3DSH_AA_BW_800;
+	LIS3DSH_InitStruct.Self_Test = LIS3DSH_SELFTEST_NORMAL;
 	
 	LIS3DSH_Init(&LIS3DSH_InitStruct);
-	LIS3DSH_DataRateCmd(LIS3DSH_DATARATE_25);
-	LIS3DSH_InterruptConfigStruct(&LIS3DSH_IntConfigStruct);
+	//LIS3DSH_InterruptConfigStruct(&LIS3DSH_IntConfigStruct);
+	LIS3DSH_IntConfigStruct.Dataready_Interrupt = LIS3DSH_DATA_READY_INTERRUPT_ENABLED;
+	LIS3DSH_IntConfigStruct.Interrupt_signal = LIS3DSH_ACTIVE_HIGH_INTERRUPT_SIGNAL;
+	LIS3DSH_IntConfigStruct.Interrupt_type = LIS3DSH_INTERRUPT_REQUEST_PULSED;
+	
 	LIS3DSH_DataReadyInterruptConfig(&LIS3DSH_IntConfigStruct);
+	Init_NVIC_Interrupt(EXTI0_IRQn, 0, 0);
+	
+	InitReadButton();
+	Init_NVIC_Interrupt(EXTI9_5_IRQn, 2, 3);
 	
 	uint8_t end = 0;
-	float acc;
+	float acc[3];
+	char pitch_angle[4];
+	char roll_angle[4];
 	while(1){
 			
 		if(INPUT_FLAG){
@@ -49,17 +62,26 @@ int main(void)
 			StartKeypadGPIO();
 			
 			while(!end){
-				end = test_keypad();
+				end = test_keypad(pitch_angle);
 			}
 			end = 0;
-	
+			
+			printf("pitch angle = %s\n", pitch_angle);
+			
+			while(!end){
+				end = test_keypad(roll_angle);
+			}
+			end = 0;
+			
+			printf("roll angle = %s\n", roll_angle);
+			
 			uint8_t rise_edge = 1;
 			KeyBouncingDelay(GPIOD, GPIO_PIN_8, GPIO_PIN_RESET, rise_edge);
 			
 			DeInitKeypadGPIO();
 			InitReadButton();
 			
-			Init_NVIC_Interrupt(EXTI9_5_IRQn, 2, 3, 2);
+			Init_NVIC_Interrupt(EXTI9_5_IRQn, 2, 3);
 				
 			INPUT_FLAG = 0;
 		}

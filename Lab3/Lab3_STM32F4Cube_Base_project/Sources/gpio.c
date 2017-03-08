@@ -49,6 +49,8 @@ GPIO_InitTypeDef GPIO_Col_init;
 GPIO_InitTypeDef GPIO_Col_Hash;
 GPIO_InitTypeDef GPIO_Row_Hash;
 
+GPIO_InitTypeDef GPIO_Acc;
+
 static const uint16_t Row[4] = {GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, GPIO_PIN_4};
 static const uint16_t Col[4] = {GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8};
 char mapKeypad(int8_t column, int8_t row);
@@ -57,7 +59,7 @@ GPIO_InitTypeDef GPIOB_init;
 GPIO_InitTypeDef GPIOA_init;
 GPIO_InitTypeDef GPIOLED_init; 
 uint8_t led = 0, temp_counter = 0, celsius = 0, rise_edge = 0;
-
+uint8_t angle_index = 0;
 /* Function: StartKeypadGPIO
  * Description: Initialises the GPIO pins responsible for the detection of the 4 by 4 keypad
  */
@@ -86,6 +88,17 @@ void DeInitReadButton(){
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_SET);
 	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_4);
 	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_8);
+}
+
+void InitAccGPIO(){
+	__HAL_RCC_GPIOE_CLK_ENABLE();
+	
+	GPIO_Acc.Pin = GPIO_PIN_0;
+	GPIO_Acc.Mode = GPIO_MODE_IT_RISING;
+	GPIO_Acc.Pull = GPIO_PULLDOWN;
+	GPIO_Acc.Speed = GPIO_SPEED_FREQ_LOW;
+	
+	HAL_GPIO_Init(GPIOE, &GPIO_Acc);
 }
 void StartKeypadGPIO(){
 	
@@ -119,7 +132,7 @@ void DeInitKeypadGPIO(){
 		HAL_GPIO_DeInit(GPIOD, Col[i]);
 	}
 }
-uint8_t test_keypad(){
+uint8_t test_keypad(char angle[4]){
 	int8_t col_index = -1;
 	int8_t row_index = -1;
 //	int8_t value = -1;
@@ -159,11 +172,24 @@ uint8_t test_keypad(){
 	KeyBouncingDelay(GPIOD, Col[col_index], GPIO_PIN_RESET, rise_edge);
 	
 	if(col_index == 3 && row_index == 3){
+		angle[angle_index + 1] = '\0'; 
+		angle_index = 0;
 		return 1;
 	}
 	
 	if(col_index >= 0 && row_index >= 0){
-		char button = mapKeypad(col_index, row_index);
+		char button = mapKeypad(row_index, col_index);
+		if(button == 'D'){
+			if(angle_index > 0){
+				angle_index--;
+			}
+			angle[angle_index] = '\0'; 
+			printf("button = [%d\t%d] %c\n", col_index, row_index, button);
+			return 0;
+		}else if(angle_index < 3){
+			angle[angle_index] = button;
+			angle_index++;
+		}
 		printf("button = [%d\t%d] %c\n", col_index, row_index, button);
 	}
 	
@@ -190,7 +216,7 @@ char mapKeypad(int8_t column, int8_t row) {
 			case 3: return '0'; break;
 			default : return NULL;
 		} break;
-		case 2: switch (row) {
+		case 3: switch (row) {
 			case 0: return '3'; break;
 			case 1: return '6'; break;
 			case 2: return '9'; break;

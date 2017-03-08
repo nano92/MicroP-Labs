@@ -56,9 +56,8 @@ void LIS3DSH_InterruptConfigStruct(LIS3DSH_DRYInterruptConfigTypeDef *LIS3DSH_In
 	LIS3DSH_IntConfigStruct->Interrupt_type = LIS3DSH_INTERRUPT_REQUEST_PULSED;
 }
 
-void Init_NVIC_Interrupt(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubPriority, uint32_t GroupPriority){
+void Init_NVIC_Interrupt(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubPriority){
 	HAL_NVIC_SetPriority(IRQn, PreemptPriority, SubPriority);
-	HAL_NVIC_SetPriorityGrouping(GroupPriority);
 	HAL_NVIC_EnableIRQ(IRQn);
 }
 

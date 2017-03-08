@@ -56,10 +56,11 @@ void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void InitReadButton();
+void InitAccGPIO();
 void DeInitReadButton();
 void StartKeypadGPIO();
 void DeInitKeypadGPIO();
-uint8_t test_keypad();
+uint8_t test_keypad(char angle[3]);
 void StartButtonGPIO();
 void StartLEDGPIO();
 //uint8_t changeDisplay();
