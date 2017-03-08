@@ -46,15 +46,47 @@
 GPIO_InitTypeDef GPIO_Row_init;
 GPIO_InitTypeDef GPIO_Col_init;
 
+GPIO_InitTypeDef GPIO_Col_Hash;
+GPIO_InitTypeDef GPIO_Row_Hash;
+
+static const uint16_t Row[4] = {GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, GPIO_PIN_4};
+static const uint16_t Col[4] = {GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8};
+char mapKeypad(int8_t column, int8_t row);
+
 GPIO_InitTypeDef GPIOB_init;
 GPIO_InitTypeDef GPIOA_init;
-GPIO_InitTypeDef GPIOLED_init;
-
+GPIO_InitTypeDef GPIOLED_init; 
 uint8_t led = 0, temp_counter = 0, celsius = 0, rise_edge = 0;
 
 /* Function: StartKeypadGPIO
  * Description: Initialises the GPIO pins responsible for the detection of the 4 by 4 keypad
  */
+void InitReadButton(){
+	__HAL_RCC_GPIOD_CLK_ENABLE();
+	
+	GPIO_Row_Hash.Pin = GPIO_PIN_4;
+	GPIO_Col_Hash.Pin = GPIO_PIN_8;
+	
+	GPIO_Row_Hash.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_Col_Hash.Mode = GPIO_MODE_IT_FALLING;
+	
+	GPIO_Row_Hash.Pull = GPIO_NOPULL;
+	GPIO_Col_Hash.Pull = GPIO_PULLUP;
+	
+	GPIO_Row_Hash.Speed = GPIO_SPEED_FREQ_MEDIUM;
+	GPIO_Col_Hash.Speed = GPIO_SPEED_FREQ_MEDIUM;
+	
+	HAL_GPIO_Init(GPIOD, &GPIO_Row_Hash);
+	HAL_GPIO_Init(GPIOD, &GPIO_Col_Hash);
+	
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_RESET);
+}
+
+void DeInitReadButton(){
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_SET);
+	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_4);
+	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_8);
+}
 void StartKeypadGPIO(){
 	
 	__HAL_RCC_GPIOD_CLK_ENABLE();
@@ -81,46 +113,61 @@ void StartKeypadGPIO(){
 	HAL_GPIO_Init(GPIOD, &GPIO_Col_init);
 	
 }
-
-void test_keypad(){
-	const uint16_t Row[4] = {GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, GPIO_PIN_4};
-	const uint16_t Col[4] = {GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8};
-	int8_t col_value[4] = {0, 0, 0, 0};
+void DeInitKeypadGPIO(){
+	for(uint8_t i = 0; i < 4; i++){
+		HAL_GPIO_DeInit(GPIOD, Row[i]);
+		HAL_GPIO_DeInit(GPIOD, Col[i]);
+	}
+}
+uint8_t test_keypad(){
 	int8_t col_index = -1;
-	
-	for(int16_t d = 9000; d > 0; d--) {
-		int8_t col_index = -1;	
+	int8_t row_index = -1;
+//	int8_t value = -1;
+//	for(int i =0; i < 9000; i++){
+//		HAL_GPIO_WritePin(GPIOD, Row[1], GPIO_PIN_RESET);
+//		value = (HAL_GPIO_ReadPin(GPIOD, Col[1]) == GPIO_PIN_RESET)? 1 : 0;
+//	}
+//	printf("value = %d\n", value);
+	while(col_index == -1) {
 		for(int8_t i = 0; i < 4; i++){
 			HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_RESET);
 		}
 		for(int8_t i = 0; i < 4; i++){
-				col_value[i] = HAL_GPIO_ReadPin(GPIOD, Col[i]);
+				col_index = (HAL_GPIO_ReadPin(GPIOD, Col[i]) == GPIO_PIN_RESET)? i : -1;
+				if (col_index >= 0) {						
+					rise_edge = 1;
+					break;
+				}
 		}
 	}
-	if (col_value[0] || col_value[1] || col_value[2] || col_value[3]) {
+	printf("rise: %d\n", rise_edge);
+	if (rise_edge) {
 		for(int8_t i = 0; i < 4; i++){
 			HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_SET);
 		}
-		for(int8_t i = 0; i < 4; i++){
-			HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_RESET);
 
-			for(int8_t i = 0; i < 4; i++){
-				int8_t value = HAL_GPIO_ReadPin(GPIOD, Col[i]);
-				col_index = (value == 0) ? i : -1;
-				if(col_index != -1){
-					break;
-					}	
-				}
-				if(col_index != -1){
-					break;
-				}
-				HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_SET);
+		for(int8_t j = 0; j < 4; j++){
+			HAL_GPIO_WritePin(GPIOD, Row[j], GPIO_PIN_RESET);
+			if(HAL_GPIO_ReadPin(GPIOD, Col[col_index]) == GPIO_PIN_RESET) {				
+				row_index = j;
+				break;
 			}
-		} 
-		if(col_index >= 0){
-			printf("col_index = %d\n", col_index);
+			HAL_GPIO_WritePin(GPIOD, Row[j], GPIO_PIN_SET);
 		}
+	} 
 	
+	KeyBouncingDelay(GPIOD, Col[col_index], GPIO_PIN_RESET, rise_edge);
+	
+	if(col_index == 3 && row_index == 3){
+		return 1;
+	}
+	
+	if(col_index >= 0 && row_index >= 0){
+		char button = mapKeypad(col_index, row_index);
+		printf("button = [%d\t%d] %c\n", col_index, row_index, button);
+	}
+	
+	return 0;
 }
 /* Function : mapKeypad
 	 Input    : int8_t column, int8_t row

@@ -55,3 +55,15 @@ void LIS3DSH_InterruptConfigStruct(LIS3DSH_DRYInterruptConfigTypeDef *LIS3DSH_In
 	LIS3DSH_IntConfigStruct->Interrupt_signal = LIS3DSH_ACTIVE_HIGH_INTERRUPT_SIGNAL;
 	LIS3DSH_IntConfigStruct->Interrupt_type = LIS3DSH_INTERRUPT_REQUEST_PULSED;
 }
+
+void Init_NVIC_Interrupt(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubPriority, uint32_t GroupPriority){
+	HAL_NVIC_SetPriority(IRQn, PreemptPriority, SubPriority);
+	HAL_NVIC_SetPriorityGrouping(GroupPriority);
+	HAL_NVIC_EnableIRQ(IRQn);
+}
+
+void KeyBouncingDelay(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_state, uint8_t rise_edge){
+	while(rise_edge) {
+		rise_edge = (HAL_GPIO_ReadPin(GPIOx, GPIO_Pin) == pin_state);
+	}
+}

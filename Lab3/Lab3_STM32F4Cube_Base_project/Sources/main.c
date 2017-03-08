@@ -29,24 +29,40 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
   /* Initialize all configured peripherals */
-	HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
-	HAL_NVIC_SetPriority(EXTI9_5_IRQn, 2, 3);
+	
+	Init_NVIC_Interrupt(EXTI9_5_IRQn, 2, 3, 2);
+	InitReadButton();
 	
 	LIS3DSH_Init(&LIS3DSH_InitStruct);
 	LIS3DSH_DataRateCmd(LIS3DSH_DATARATE_25);
 	LIS3DSH_InterruptConfigStruct(&LIS3DSH_IntConfigStruct);
 	LIS3DSH_DataReadyInterruptConfig(&LIS3DSH_IntConfigStruct);
 	
-	StartKeypadGPIO();
-	while (1){
-		if(HAL_GPIO_ReadPin(GPIOD, Col[0]) == 1 ||
-				HAL_GPIO_ReadPin(GPIOD, Col[1]) == 1 ||
-				HAL_GPIO_ReadPin(GPIOD, Col[2]) == 1 ||
-				HAL_GPIO_ReadPin(GPIOD, Col[3]) == 1){
+	uint8_t end = 0;
+	float acc;
+	while(1){
+			
+		if(INPUT_FLAG){
+			HAL_NVIC_DisableIRQ(EXTI9_5_IRQn);
+			
+			DeInitReadButton();
+			StartKeypadGPIO();
+			
+			while(!end){
+				end = test_keypad();
+			}
+			end = 0;
+	
+			uint8_t rise_edge = 1;
+			KeyBouncingDelay(GPIOD, GPIO_PIN_8, GPIO_PIN_RESET, rise_edge);
+			
+			DeInitKeypadGPIO();
+			InitReadButton();
+			
+			Init_NVIC_Interrupt(EXTI9_5_IRQn, 2, 3, 2);
 				
-			HAL_NVIC_SetPendingIRQ(EXTI9_5_IRQn);
+			INPUT_FLAG = 0;
 		}
-		//test_keypad();
 	}
 }
 
