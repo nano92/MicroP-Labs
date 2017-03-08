@@ -52,8 +52,8 @@ GPIO_InitTypeDef GPIOLED_init;
 
 uint8_t led = 0, temp_counter = 0, celsius = 0, rise_edge = 0;
 
-/* Function: Start7SegmentDisplayGPIO
- * Description: Initialises the GPIO pins responsible for the 4 digits 7 segment display
+/* Function: StartKeypadGPIO
+ * Description: Initialises the GPIO pins responsible for the detection of the 4 by 4 keypad
  */
 void StartKeypadGPIO(){
 	
@@ -95,6 +95,7 @@ void test_keypad(){
 		}
 		for(int8_t i = 0; i < 4; i++){
 				col_value[i] = HAL_GPIO_ReadPin(GPIOD, Col[i]);
+		}
 	}
 	if (col_value[0] || col_value[1] || col_value[2] || col_value[3]) {
 		for(int8_t i = 0; i < 4; i++){
@@ -108,21 +109,59 @@ void test_keypad(){
 				col_index = (value == 0) ? i : -1;
 				if(col_index != -1){
 					break;
-				}	
-			}
-			if(col_index != -1){
+					}	
+				}
+				if(col_index != -1){
 					break;
+				}
+				HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_SET);
 			}
-			HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_SET);
+		} 
+		if(col_index >= 0){
+			printf("col_index = %d\n", col_index);
 		}
-	} 
-	if(col_index >= 0){
-		printf("col_index = %d\n", col_index);
-	}
-		
-	
 	
 }
+/* Function : mapKeypad
+	 Input    : int8_t column, int8_t row
+	 Returns  : char value
+   Description : maps the obtained column and row values to the appropiate character in the key pad
+*/
+char mapKeypad(int8_t column, int8_t row) {
+	switch (column) {
+		case 0: switch (row) {
+			case 0: return '1'; break;
+			case 1: return '4'; break;
+			case 2: return '7'; break;
+			case 3: return 'D'; break;// D for Delete
+			default : return NULL;
+		} break;
+		case 1: switch (row) {
+			case 0: return '2'; break;
+			case 1: return '5'; break;
+			case 2: return '8'; break;
+			case 3: return '0'; break;
+			default : return NULL;
+		} break;
+		case 2: switch (row) {
+			case 0: return '3'; break;
+			case 1: return '6'; break;
+			case 2: return '9'; break;
+			case 3: return 'E'; break;// E for Enter
+			default : return NULL;
+		}  break;
+//		case 3: switch (row) {
+//			case 0: return 'A'; break;
+//			case 1: return 'B'; break;
+//			case 2: return 'C'; break;
+//			case 3: return '*'; break;// * since D is that the *-Key location
+//			default : return NULL;
+//		} break;
+		default : return NULL;
+	}		
+
+}
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LAB 2 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 /* Function: StartButtonGPIO
  * Description: Initialises the GPIO pin responsible for the user button that would change the temperature measurement from 
  * Celcius to Farenheit.
