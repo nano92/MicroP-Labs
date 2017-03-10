@@ -15,7 +15,7 @@ float X_MEM[7] = {0,0,0,0,0,0,0};
 float Y_MEM[7] = {0,0,0,0,0,0,0};
 float Z_MEM[7] = {0,0,0,0,0,0,0};
 
-float ROLL;
+float ROLL, PITCH;
 
 /* Function : calibrate
  * Input    : float* acc
@@ -47,38 +47,19 @@ float filter(float currentValue, float* prevValues) {
 	}
 	return filteredValue
 }
-/* Function : getPitch
- * Input    : float x, float y, float z
- * Returns  : float pitch
- * Description: Calculates the pitch angle on the board based on the positions obtained from the filtered accelerometer values.
-*/
-float getPitch (float x, float y, float z) {
-	float pitch = atan2(x, (sqrt(y*y+z*z))) * 180.0 / PI;
-	
-	if ( z < 0 && pitch < 0){
-		pitch = 180 + pitch;
-	}
-	else if( z < 0 && pitch > 0) {
-			pitch = 180 - pitch;
-	}
-	else if ( pitch < 0 ){
-		pitch = -pitch;
-	}
-	return pitch;
-}
 
 /* Function : getRoll
  * Input    : float x, float y, float z
  * Returns  : float roll
  * Description: Calculates the roll angle on the board based on the positions obtained from the filtered accelerometer values.
 */
-float getRoll (float x, float y, float z) {
+float calculRoll (float x, float y, float z) {
 	float roll = atan2(y, (sqrt(x*x+z*z))) * 180.0 / PI;
 	
-	if ( z < 0 && roll < 0){
+	if ( x < 0 && roll < 0){
 		roll = 180 + roll;
 	}
-	else if( z < 0 && roll > 0) {
+	else if( x < 0 && roll > 0) {
 			roll = 180 - roll;
 	}
 	else if ( roll < 0 ){
@@ -87,6 +68,30 @@ float getRoll (float x, float y, float z) {
 	return roll;
 }
 
+/* Function : getPitch
+ * Input    : float x, float y, float z
+ * Returns  : float pitch
+ * Description: Calculates the pitch angle on the board based on the positions obtained from the filtered accelerometer values.
+*/
+float calculPitch (float x, float y, float z) {
+	float pitch = atan2(x, (sqrt(y*y+z*z))) * 180.0 / PI;
+	
+	if ( y < 0 && pitch < 0){
+		pitch = 180 + pitch;
+	}
+	else if( y < 0 && pitch > 0) {
+			pitch = 180 - pitch;
+	}
+	else if ( pitch < 0 ){
+		pitch = -pitch;
+	}
+	return pitch;
+}
+
+/* Function : readingACC
+ * Description: Reads the values of the accelerometer and then calibrates and filter said values, such that the proper pitch/roll angle can be
+ * computed.
+*/
 void readingACC() {
 	float acc[3];
 	LIS3DSH_ReadACC(acc);
