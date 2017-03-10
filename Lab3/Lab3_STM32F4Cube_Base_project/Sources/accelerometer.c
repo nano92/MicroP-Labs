@@ -92,12 +92,15 @@ float calculPitch (float x, float y, float z) {
  * Description: Reads the values of the accelerometer and then calibrates and filter said values, such that the proper pitch/roll angle can be
  * computed.
 */
-float readingACC(float* acc) {
+float readingACC() {
+	float pitch;
+	float acc[3];
+	LIS3DSH_ReadACC(acc);
 	calibrate(acc);
 	
 	float acc_x = filter(acc[0],X_MEM);
 	float acc_y = filter(acc[1],Y_MEM);
 	float acc_z = filter(acc[2],Z_MEM);
 	
-	return pitch = calculPitch(&acc_x, &acc_y, &acc_z);
+	return pitch = calculPitch(acc_x, acc_y, acc_z);
 }
