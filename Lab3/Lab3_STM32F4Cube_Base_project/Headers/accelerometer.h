@@ -17,5 +17,5 @@
 
 
 //extern TIM_HandleTypeDef handle_tim;
-float readingACC()
+void readingACC(float *values);
 #endif

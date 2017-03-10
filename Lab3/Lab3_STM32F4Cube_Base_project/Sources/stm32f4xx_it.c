@@ -42,6 +42,7 @@
 #include "stm32f4xx_it.h"
 #include "lis3dsh.h"
 #include "timer.h"
+#include "accelerometer.h"
 /** @addtogroup STM32F4xx_HAL_Examples
   * @{
   */
@@ -54,9 +55,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static const uint16_t Col[4] = {GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8, GPIO_PIN_9};
 char INPUT_FLAG = 0;
-char ACC_READ_FLAG = 0;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -188,9 +187,7 @@ void EXTI0_IRQHandler(void){
 	}
 	
 }
-//void TIM4_IRQHandler(void){
-//	HAL_TIM_IRQHandler(&handle_tim);
-//}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	switch(GPIO_Pin){
 		case GPIO_PIN_8:{ 
@@ -202,7 +199,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 			break;
 		}
 		case GPIO_PIN_0:{
-			ACC_READ_FLAG = 1;
+			float angles[2];
+			readingACC(angles);
+			Set_LEDBrightness((int16_t)angles[0], (int16_t)angles[1] , getRoll(), getPitch());
 			break;
 		}
 		default : break;

@@ -31,7 +31,11 @@ void Error_Handler						(uint16_t error_code);
 void LIS3DSH_InterruptConfigStruct(LIS3DSH_DRYInterruptConfigTypeDef *LIS3DSH_IntConfigStruct);
 void Init_NVIC_Interrupt(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubPriority);
 void KeyBouncingDelay(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_state, uint8_t rise_edge);
-void Init_ACC();
-void Init_Read_Keypad();
+void Init_ACC(void);
+void Init_Read_Keypad(void);
+void setPitch(int16_t pitch);
+int16_t getPitch(void);
+void setRoll(int16_t roll);
+int16_t getRoll(void);
 
 #endif

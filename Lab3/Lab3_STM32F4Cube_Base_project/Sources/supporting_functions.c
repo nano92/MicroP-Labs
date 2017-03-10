@@ -26,6 +26,7 @@
 LIS3DSH_InitTypeDef LIS3DSH_InitStruct;
 LIS3DSH_DRYInterruptConfigTypeDef LIS3DSH_IntConfigStruct;
 
+int16_t PITCH = 0, ROLL = 0;
 void Error_Handler			(uint16_t error_code){
 	//User error handling code, could use printf to relay information to user
 	switch (error_code){	
@@ -69,9 +70,9 @@ void KeyBouncingDelay(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_
 	}
 }
 
-void Init_ACC(){
+void Init_ACC(void){
 	__HAL_RCC_GPIOE_CLK_ENABLE();
-	LIS3DSH_InitStruct.Power_Mode_Output_DataRate = LIS3DSH_DATARATE_100;//LIS3DSH_DATARATE_25;
+	LIS3DSH_InitStruct.Power_Mode_Output_DataRate = LIS3DSH_DATARATE_25;
 	LIS3DSH_InitStruct.Axes_Enable = LIS3DSH_XYZ_ENABLE;
 	LIS3DSH_InitStruct.Continous_Update = LIS3DSH_ContinousUpdate_Disabled;
 	LIS3DSH_InitStruct.Full_Scale = LIS3DSH_FULLSCALE_2;
@@ -89,11 +90,21 @@ void Init_ACC(){
 	Init_NVIC_Interrupt(EXTI0_IRQn, 0, 3);
 }
 
-void Init_Read_Keypad(){
+void Init_Read_Keypad(void){
 		InitReadButton();
 		Init_NVIC_Interrupt(EXTI9_5_IRQn, 0, 2);
 }
 
-void LED_display(float *acc){
-	
+void setPitch(int16_t pitch){
+	PITCH = pitch;
+}
+int16_t getPitch(void){
+	return PITCH;
+}
+
+void setRoll(int16_t roll){
+	ROLL = roll;
+}
+int16_t getRoll(void){
+	return ROLL;
 }
