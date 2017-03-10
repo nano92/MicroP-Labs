@@ -11,11 +11,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "supporting_functions.h"
+#include "timer.h"
 #include "lis3dsh.h"
 
 /* Private variables ---------------------------------------------------------*/
-LIS3DSH_InitTypeDef LIS3DSH_InitStruct;
-LIS3DSH_DRYInterruptConfigTypeDef LIS3DSH_IntConfigStruct;
 static const uint16_t Col[4] = {GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8, GPIO_PIN_9};
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config	(void);
@@ -28,31 +27,19 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
   /* Initialize all configured peripherals */	
-	//InitAccGPIO();
-	__HAL_RCC_GPIOE_CLK_ENABLE();
-	LIS3DSH_InitStruct.Power_Mode_Output_DataRate = LIS3DSH_DATARATE_25;
-	LIS3DSH_InitStruct.Axes_Enable = LIS3DSH_XYZ_ENABLE;
-	LIS3DSH_InitStruct.Continous_Update = LIS3DSH_ContinousUpdate_Disabled;
-	LIS3DSH_InitStruct.Full_Scale = LIS3DSH_FULLSCALE_2;
-	LIS3DSH_InitStruct.AA_Filter_BW = LIS3DSH_AA_BW_800;
-	LIS3DSH_InitStruct.Self_Test = LIS3DSH_SELFTEST_NORMAL;
+	Init_Read_Keypad();
+	StartLEDGPIO();
+	Init_ACC();
 	
-	LIS3DSH_Init(&LIS3DSH_InitStruct);
-	//LIS3DSH_InterruptConfigStruct(&LIS3DSH_IntConfigStruct);
-	LIS3DSH_IntConfigStruct.Dataready_Interrupt = LIS3DSH_DATA_READY_INTERRUPT_ENABLED;
-	LIS3DSH_IntConfigStruct.Interrupt_signal = LIS3DSH_ACTIVE_HIGH_INTERRUPT_SIGNAL;
-	LIS3DSH_IntConfigStruct.Interrupt_type = LIS3DSH_INTERRUPT_REQUEST_PULSED;
-	
-	LIS3DSH_DataReadyInterruptConfig(&LIS3DSH_IntConfigStruct);
-	Init_NVIC_Interrupt(EXTI0_IRQn, 0, 0);
-	
-	InitReadButton();
-	Init_NVIC_Interrupt(EXTI9_5_IRQn, 2, 3);
+	if(Init_TIM_Config() != HAL_OK){
+		printf("TIM_Config error\n");
+	}
 	
 	uint8_t end = 0;
 	float acc[3];
 	char pitch_angle[4];
 	char roll_angle[4];
+	int16_t pitch = 0, roll = 0;
 	while(1){
 			
 		if(INPUT_FLAG){
@@ -66,24 +53,38 @@ int main(void)
 			}
 			end = 0;
 			
-			printf("pitch angle = %s\n", pitch_angle);
+			pitch = atoi(pitch_angle);
+			printf("pitch angle = %d\n", pitch);
 			
 			while(!end){
 				end = test_keypad(roll_angle);
 			}
 			end = 0;
 			
-			printf("roll angle = %s\n", roll_angle);
+			roll = atoi(roll_angle);
+			printf("roll angle = %d\n", roll);
 			
 			uint8_t rise_edge = 1;
 			KeyBouncingDelay(GPIOD, GPIO_PIN_8, GPIO_PIN_RESET, rise_edge);
 			
 			DeInitKeypadGPIO();
-			InitReadButton();
+
+			Init_Read_Keypad();
 			
-			Init_NVIC_Interrupt(EXTI9_5_IRQn, 2, 3);
-				
 			INPUT_FLAG = 0;
+			
+			Init_ACC();
+			
+			if(Init_TIM_Config() != HAL_OK){
+				printf("TIM_Config error\n");
+			}
+			
+		}else if(ACC_READ_FLAG){
+			ACC_READ_FLAG = 0;
+			LIS3DSH_ReadACC(acc);
+			//Calibrate value
+			//Filter calibrated value
+			Set_LEDBrightness(75, 10, 145, 145);
 		}
 	}
 }

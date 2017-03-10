@@ -66,7 +66,7 @@ uint8_t angle_index = 0;
 void InitReadButton(){
 	__HAL_RCC_GPIOD_CLK_ENABLE();
 	
-	GPIO_Row_Hash.Pin = GPIO_PIN_4;
+	GPIO_Row_Hash.Pin = GPIO_PIN_3;
 	GPIO_Col_Hash.Pin = GPIO_PIN_8;
 	
 	GPIO_Row_Hash.Mode = GPIO_MODE_OUTPUT_PP;
@@ -81,12 +81,12 @@ void InitReadButton(){
 	HAL_GPIO_Init(GPIOD, &GPIO_Row_Hash);
 	HAL_GPIO_Init(GPIOD, &GPIO_Col_Hash);
 	
-	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_RESET);
 }
 
 void DeInitReadButton(){
-	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_SET);
-	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_4);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
+	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_3);
 	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_8);
 }
 
@@ -171,7 +171,7 @@ uint8_t test_keypad(char angle[4]){
 	
 	KeyBouncingDelay(GPIOD, Col[col_index], GPIO_PIN_RESET, rise_edge);
 	
-	if(col_index == 3 && row_index == 3){
+	if(col_index == 3 && row_index == 2){
 		angle[angle_index + 1] = '\0'; 
 		angle_index = 0;
 		return 1;
@@ -216,7 +216,7 @@ char mapKeypad(int8_t column, int8_t row) {
 			case 3: return '0'; break;
 			default : return NULL;
 		} break;
-		case 3: switch (row) {
+		case 2: switch (row) {
 			case 0: return '3'; break;
 			case 1: return '6'; break;
 			case 2: return '9'; break;
@@ -254,9 +254,13 @@ void StartButtonGPIO(){
  */
 void StartLEDGPIO(){
 	GPIOLED_init.Pin = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
-	GPIOLED_init.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIOLED_init.Pull = GPIO_PULLDOWN;
-	GPIOLED_init.Speed = GPIO_SPEED_FAST;
+	GPIOLED_init.Mode = GPIO_MODE_AF_OD;
+	GPIOLED_init.Pull = GPIO_NOPULL;
+	GPIOLED_init.Speed = GPIO_SPEED_FREQ_MEDIUM;
+	GPIOLED_init.Alternate = GPIO_AF2_TIM4;
+//	GPIOLED_init.Mode = GPIO_MODE_OUTPUT_PP;
+//	GPIOLED_init.Pull = GPIO_PULLDOWN;
+//	GPIOLED_init.Speed = GPIO_SPEED_FAST;
 	
 	HAL_GPIO_Init(GPIOD, &GPIOLED_init);
 }

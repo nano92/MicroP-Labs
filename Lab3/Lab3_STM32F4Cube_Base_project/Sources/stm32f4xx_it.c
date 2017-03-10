@@ -41,6 +41,7 @@
 #include "main.h"
 #include "stm32f4xx_it.h"
 #include "lis3dsh.h"
+#include "timer.h"
 /** @addtogroup STM32F4xx_HAL_Examples
   * @{
   */
@@ -55,6 +56,7 @@
 /* Private variables ---------------------------------------------------------*/
 static const uint16_t Col[4] = {GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8, GPIO_PIN_9};
 char INPUT_FLAG = 0;
+char ACC_READ_FLAG = 0;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -175,31 +177,37 @@ void SysTick_Handler(void)
 {
 }*/
 void EXTI9_5_IRQHandler(void){
-	
-	//for(uint16_t i = 0; i < 4; i++){
-		//for(uint16_t d = 200; d > 0; d--){
-			//count++;
-			//if(HAL_GPIO_ReadPin(GPIOD, Col[0]) == 1){
-				//printf("Hello");
-				HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8); //| Col[1] | Col[2] | Col[3]);
-				//break;
-			//}
-			//printf("count = %d\n", count);
-		//}
-	//}
-	//HAL_TIM_Base_Start_IT
+	HAL_NVIC_DisableIRQ(EXTI0_IRQn);
+	HAL_NVIC_DisableIRQ(TIM4_IRQn);
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8); 
 }
-	float acc[3];
+
 void EXTI0_IRQHandler(void){
-	LIS3DSH_ReadACC(acc);
-	printf("acc = %.f\t%.f\t%.f\n", acc[0], acc[1], acc[2]);
-}
-void HAL_GPIO_EXTI_Callback(uint16_t col_index){
-	uint8_t rise_edge = 1;
-	while(rise_edge) {
-		rise_edge = (HAL_GPIO_ReadPin(GPIOD, col_index) == GPIO_PIN_RESET);
+	if(INPUT_FLAG == 0){
+		HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0); 	
 	}
-	INPUT_FLAG = 1;
+	
+}
+//void TIM4_IRQHandler(void){
+//	HAL_TIM_IRQHandler(&handle_tim);
+//}
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	switch(GPIO_Pin){
+		case GPIO_PIN_8:{ 
+			uint8_t rise_edge = 1;
+			while(rise_edge){
+				rise_edge = (HAL_GPIO_ReadPin(GPIOD, GPIO_Pin) == GPIO_PIN_RESET);
+			}
+			INPUT_FLAG = 1;
+			break;
+		}
+		case GPIO_PIN_0:{
+			ACC_READ_FLAG = 1;
+			break;
+		}
+		default : break;
+	}
+	
 }
 /**
   * @}
