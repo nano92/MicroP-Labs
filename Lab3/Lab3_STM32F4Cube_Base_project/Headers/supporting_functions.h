@@ -14,6 +14,7 @@
 #include "gpio.h"
 #include "lis3dsh.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 //Add as many definitions as you see necessary. 
 
@@ -30,5 +31,7 @@ void Error_Handler						(uint16_t error_code);
 void LIS3DSH_InterruptConfigStruct(LIS3DSH_DRYInterruptConfigTypeDef *LIS3DSH_IntConfigStruct);
 void Init_NVIC_Interrupt(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubPriority);
 void KeyBouncingDelay(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_state, uint8_t rise_edge);
+void Init_ACC();
+void Init_Read_Keypad();
 
 #endif

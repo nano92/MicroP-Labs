@@ -23,7 +23,9 @@
 	 //whatever error message you want. Helps you in debugging your code at many points during developing
 	 //your codes
 	 
-	 
+LIS3DSH_InitTypeDef LIS3DSH_InitStruct;
+LIS3DSH_DRYInterruptConfigTypeDef LIS3DSH_IntConfigStruct;
+
 void Error_Handler			(uint16_t error_code){
 	//User error handling code, could use printf to relay information to user
 	switch (error_code){	
@@ -65,4 +67,33 @@ void KeyBouncingDelay(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_
 	while(rise_edge) {
 		rise_edge = (HAL_GPIO_ReadPin(GPIOx, GPIO_Pin) == pin_state);
 	}
+}
+
+void Init_ACC(){
+	__HAL_RCC_GPIOE_CLK_ENABLE();
+	LIS3DSH_InitStruct.Power_Mode_Output_DataRate = LIS3DSH_DATARATE_100;//LIS3DSH_DATARATE_25;
+	LIS3DSH_InitStruct.Axes_Enable = LIS3DSH_XYZ_ENABLE;
+	LIS3DSH_InitStruct.Continous_Update = LIS3DSH_ContinousUpdate_Disabled;
+	LIS3DSH_InitStruct.Full_Scale = LIS3DSH_FULLSCALE_2;
+	LIS3DSH_InitStruct.AA_Filter_BW = LIS3DSH_AA_BW_800;
+	LIS3DSH_InitStruct.Self_Test = LIS3DSH_SELFTEST_NORMAL;
+	
+	LIS3DSH_Init(&LIS3DSH_InitStruct);
+
+	LIS3DSH_IntConfigStruct.Dataready_Interrupt = LIS3DSH_DATA_READY_INTERRUPT_ENABLED;
+	LIS3DSH_IntConfigStruct.Interrupt_signal = LIS3DSH_ACTIVE_HIGH_INTERRUPT_SIGNAL;
+	LIS3DSH_IntConfigStruct.Interrupt_type = LIS3DSH_INTERRUPT_REQUEST_PULSED;
+	
+	LIS3DSH_DataReadyInterruptConfig(&LIS3DSH_IntConfigStruct);
+	
+	Init_NVIC_Interrupt(EXTI0_IRQn, 0, 3);
+}
+
+void Init_Read_Keypad(){
+		InitReadButton();
+		Init_NVIC_Interrupt(EXTI9_5_IRQn, 0, 2);
+}
+
+void LED_display(float *acc){
+	
 }
