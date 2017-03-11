@@ -42,6 +42,7 @@ int main(void)
 	int16_t pitch = 0, roll = 0;
 	while(1){
 			
+		// Reads the values inputted in to the keypad
 		if(INPUT_FLAG){
 			HAL_NVIC_DisableIRQ(EXTI9_5_IRQn);
 			
@@ -78,7 +79,7 @@ int main(void)
 			if(Init_TIM_Config() != HAL_OK){
 				printf("TIM_Config error\n");
 			}
-			
+		// Reads the vallues obtained form the ACC.
 		}else if(ACC_READ_FLAG){
 			ACC_READ_FLAG = 0;
 			LIS3DSH_ReadACC(acc);

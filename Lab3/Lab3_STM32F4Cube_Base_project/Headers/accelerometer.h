@@ -2,7 +2,8 @@
   ******************************************************************************
   * File Name          : accelerometer.h
   * Description        : Reading of the accelerometer values
-	* Author						 : Juan Carlos Borges
+	* Authors						 : Juan Carlos Borges, Luis Gallet
+  * Group              : 10	
 	* Version            : 1.0.0
 	* Date							 : March 10th, 2017
   ******************************************************************************
@@ -17,5 +18,5 @@
 
 
 //extern TIM_HandleTypeDef handle_tim;
-float readingACC()
+float readingACC();
 #endif

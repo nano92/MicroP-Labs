@@ -1,4 +1,14 @@
-
+/**
+  ******************************************************************************
+  * File Name          : accelerometer.c
+  * Description        : Reading, filtering and mapping of the accelerometer values
+	* Authors						 : Juan Carlos Borges, Luis Gallet
+  * Group              : 10	
+	* Version            : 1.0.0
+	* Date							 : March 10th, 2017
+  ******************************************************************************
+  */
+	
 #include "stm32f4xx_hal.h"
 #include "supporting_functions.h"
 #include "lis3dsh.h"
@@ -45,10 +55,10 @@ float filter(float currentValue, float* prevValues) {
 	for(int8_t i = 0; i < 7; i++) {
 		filteredValue = prevValues[i]*COEFF[i] + filteredValue;
 	}
-	return filteredValue
+	return filteredValue;
 }
 
-/* Function : getRoll
+/* Function : calculRoll
  * Input    : float x, float y, float z
  * Returns  : float roll
  * Description: Calculates the roll angle on the board based on the positions obtained from the filtered accelerometer values.
@@ -68,7 +78,7 @@ float calculRoll (float x, float y, float z) {
 	return roll;
 }
 
-/* Function : getPitch
+/* Function : calculPitch
  * Input    : float x, float y, float z
  * Returns  : float pitch
  * Description: Calculates the pitch angle on the board based on the positions obtained from the filtered accelerometer values.

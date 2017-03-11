@@ -60,6 +60,7 @@ GPIO_InitTypeDef GPIOA_init;
 GPIO_InitTypeDef GPIOLED_init; 
 uint8_t led = 0, temp_counter = 0, celsius = 0, rise_edge = 0;
 uint8_t angle_index = 0;
+
 /* Function: StartKeypadGPIO
  * Description: Initialises the GPIO pins responsible for the detection of the 4 by 4 keypad
  */
@@ -84,12 +85,18 @@ void InitReadButton(){
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_RESET);
 }
 
+/* Function: DeInitReadButton()
+* Description: Initialises the gpio pins for the interrupt button of the keypad.
+*/
 void DeInitReadButton(){
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
 	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_3);
 	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_8);
 }
 
+/* Function: InitAccGPIO()
+* Description: Initialises the accelerometer gpio pins
+*/
 void InitAccGPIO(){
 	__HAL_RCC_GPIOE_CLK_ENABLE();
 	
@@ -100,25 +107,23 @@ void InitAccGPIO(){
 	
 	HAL_GPIO_Init(GPIOE, &GPIO_Acc);
 }
+
+/* Function: StartKeypadGPIO()
+* Description: Initialises the gpio pins responsible for the keypad reading.
+*/
 void StartKeypadGPIO(){
 	
 	__HAL_RCC_GPIOD_CLK_ENABLE();
-	//__HAL_RCC_GPIOB_CLK_ENABLE();
-	
 	
 	GPIO_Row_init.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4;
 	GPIO_Col_init.Pin = GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8;
-	
-	//GPIOB_init.Pin = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
 		
 	GPIO_Row_init.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_Col_init.Mode = GPIO_MODE_INPUT;
 		
 	GPIO_Row_init.Pull = GPIO_NOPULL;
 	GPIO_Col_init.Pull = GPIO_PULLUP;
-		
-	//GPIOD_init.Speed = GPIO_SPEED_FREQ_LOW ;
-	//GPIOB_init.Speed = GPIO_SPEED_FREQ_LOW;
+
 	GPIO_Row_init.Speed = GPIO_SPEED_FREQ_MEDIUM;
 	GPIO_Col_init.Speed = GPIO_SPEED_FREQ_MEDIUM;
 	
@@ -126,21 +131,26 @@ void StartKeypadGPIO(){
 	HAL_GPIO_Init(GPIOD, &GPIO_Col_init);
 	
 }
+
+/* Function: DeInitKeypadGPIO()
+* Description: Initialises the GPIOs for the rows and columns of the matrix
+*/
 void DeInitKeypadGPIO(){
 	for(uint8_t i = 0; i < 4; i++){
 		HAL_GPIO_DeInit(GPIOD, Row[i]);
 		HAL_GPIO_DeInit(GPIOD, Col[i]);
 	}
 }
+
+/* Function : test_keypad()
+* Input : char angle[4];
+* Returns: uint8_t;
+* Definition: Reads and decodes the keypad pressing. Returns a 1 when the # key is pressed
+*/
 uint8_t test_keypad(char angle[4]){
 	int8_t col_index = -1;
 	int8_t row_index = -1;
-//	int8_t value = -1;
-//	for(int i =0; i < 9000; i++){
-//		HAL_GPIO_WritePin(GPIOD, Row[1], GPIO_PIN_RESET);
-//		value = (HAL_GPIO_ReadPin(GPIOD, Col[1]) == GPIO_PIN_RESET)? 1 : 0;
-//	}
-//	printf("value = %d\n", value);
+
 	while(col_index == -1) {
 		for(int8_t i = 0; i < 4; i++){
 			HAL_GPIO_WritePin(GPIOD, Row[i], GPIO_PIN_RESET);
@@ -223,13 +233,6 @@ char mapKeypad(int8_t column, int8_t row) {
 			case 3: return 'E'; break;// E for Enter
 			default : return NULL;
 		}  break;
-//		case 3: switch (row) {
-//			case 0: return 'A'; break;
-//			case 1: return 'B'; break;
-//			case 2: return 'C'; break;
-//			case 3: return '*'; break;// * since D is that the *-Key location
-//			default : return NULL;
-//		} break;
 		default : return NULL;
 	}		
 
@@ -258,9 +261,6 @@ void StartLEDGPIO(){
 	GPIOLED_init.Pull = GPIO_NOPULL;
 	GPIOLED_init.Speed = GPIO_SPEED_FREQ_MEDIUM;
 	GPIOLED_init.Alternate = GPIO_AF2_TIM4;
-//	GPIOLED_init.Mode = GPIO_MODE_OUTPUT_PP;
-//	GPIOLED_init.Pull = GPIO_PULLDOWN;
-//	GPIOLED_init.Speed = GPIO_SPEED_FAST;
 	
 	HAL_GPIO_Init(GPIOD, &GPIOLED_init);
 }
