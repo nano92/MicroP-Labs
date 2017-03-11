@@ -63,7 +63,6 @@ uint8_t angle_index = 0;
  * Description: Initialises the GPIO pins responsible for the detection of the 4 by 4 keypad
  */
 void InitReadButton(void){
-	
 	__HAL_RCC_GPIOD_CLK_ENABLE();
 	
 	GPIO_Row_Hash.Pin = GPIO_PIN_3;
@@ -131,7 +130,6 @@ void StartKeypadGPIO(void){
 	HAL_GPIO_Init(GPIOD, &GPIO_Col_init);
 	
 }
-
 
 /* Function: DeInitKeypadGPIO()
 * Description: Initialises the GPIOs for the rows and columns of the matrix
