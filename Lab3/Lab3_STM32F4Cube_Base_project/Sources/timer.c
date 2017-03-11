@@ -42,8 +42,6 @@ HAL_StatusTypeDef Init_TIM_Config(void){
 		return status;
 	}
 		
-	//Init_NVIC_Interrupt(TIM4_IRQn, 0, 4);
-	
 	init_OC_tim.OCMode = TIM_OCMODE_PWM1;
 	init_OC_tim.OCNPolarity = TIM_OCPOLARITY_HIGH;
 	init_OC_tim.OCIdleState = TIM_OCIDLESTATE_RESET;
@@ -63,6 +61,14 @@ HAL_StatusTypeDef Set_LEDBrightness(int16_t acc_roll_angle, int16_t acc_pitch_an
 	}
 	if(pitch_difference < 0){
 		pitch_difference = pitch_difference * -1;
+	}
+	
+	if(pitch_difference < 5){
+		pitch_difference = 0;
+	}
+	
+	if(roll_difference < 5){
+		roll_difference = 0;
 	}
 	
 	status = Set_LED_Pulse(acc_roll_angle, roll_difference, TIM_CHANNEL_2, TIM_CHANNEL_4);
@@ -116,6 +122,7 @@ HAL_StatusTypeDef Set_LED_Pulse(int16_t angle, int16_t angle_difference, uint32_
 			return status;
 		}
 	}
+	return status;
 }
 
 HAL_StatusTypeDef TIM_PWM_ConfigStart(uint32_t channel){
@@ -134,6 +141,3 @@ HAL_StatusTypeDef TIM_PWM_ConfigStart(uint32_t channel){
 	
 	return status;
 }
-//void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
-//	//printf("Hello from timer\n");
-//}

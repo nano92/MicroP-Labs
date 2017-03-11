@@ -55,16 +55,13 @@
 void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-void InitReadButton();
-void InitAccGPIO();
-void DeInitReadButton();
-void StartKeypadGPIO();
-void DeInitKeypadGPIO();
+void InitReadButton(void);
+void InitAccGPIO(void);
+void DeInitReadButton(void);
+void StartKeypadGPIO(void);
+void DeInitKeypadGPIO(void);
 uint8_t test_keypad(char angle[3]);
-void StartButtonGPIO();
-void StartLEDGPIO();
-//uint8_t changeDisplay();
-void DisplayTemperature(char command[4][9], char temp_alarm);
+void StartLEDGPIO(void);
 	
 /* USER CODE END Prototypes */
 

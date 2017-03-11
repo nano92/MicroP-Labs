@@ -25,8 +25,6 @@ float X_MEM[7] = {0,0,0,0,0,0,0};
 float Y_MEM[7] = {0,0,0,0,0,0,0};
 float Z_MEM[7] = {0,0,0,0,0,0,0};
 
-float ROLL, PITCH;
-
 /* Function : calibrate
  * Input    : float* acc
  * Description: Calibrates the values obtained from the accelerometer.
@@ -102,8 +100,7 @@ float calculPitch (float x, float y, float z) {
  * Description: Reads the values of the accelerometer and then calibrates and filter said values, such that the proper pitch/roll angle can be
  * computed.
 */
-float readingACC() {
-	float pitch;
+void readingACC(float *values) {
 	float acc[3];
 	LIS3DSH_ReadACC(acc);
 	calibrate(acc);
@@ -112,5 +109,6 @@ float readingACC() {
 	float acc_y = filter(acc[1],Y_MEM);
 	float acc_z = filter(acc[2],Z_MEM);
 	
-	return pitch = calculPitch(acc_x, acc_y, acc_z);
+	values[0] = calculRoll (acc_x, acc_y, acc_z);
+	values[1] = calculPitch(acc_x, acc_y, acc_z);
 }

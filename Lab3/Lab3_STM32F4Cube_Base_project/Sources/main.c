@@ -15,7 +15,7 @@
 #include "lis3dsh.h"
 
 /* Private variables ---------------------------------------------------------*/
-static const uint16_t Col[4] = {GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8, GPIO_PIN_9};
+
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config	(void);
 
@@ -36,10 +36,10 @@ int main(void)
 	}
 	
 	uint8_t end = 0;
-	float acc[3];
 	char pitch_angle[4];
 	char roll_angle[4];
 	int16_t pitch = 0, roll = 0;
+	
 	while(1){
 			
 		// Reads the values inputted in to the keypad
@@ -57,6 +57,8 @@ int main(void)
 			pitch = atoi(pitch_angle);
 			printf("pitch angle = %d\n", pitch);
 			
+			setPitch(pitch);
+			
 			while(!end){
 				end = test_keypad(roll_angle);
 			}
@@ -64,6 +66,8 @@ int main(void)
 			
 			roll = atoi(roll_angle);
 			printf("roll angle = %d\n", roll);
+			
+			setRoll(roll);
 			
 			uint8_t rise_edge = 1;
 			KeyBouncingDelay(GPIOD, GPIO_PIN_8, GPIO_PIN_RESET, rise_edge);
@@ -75,21 +79,9 @@ int main(void)
 			INPUT_FLAG = 0;
 			
 			Init_ACC();
-			
-			if(Init_TIM_Config() != HAL_OK){
-				printf("TIM_Config error\n");
-			}
-		// Reads the vallues obtained form the ACC.
-		}else if(ACC_READ_FLAG){
-			ACC_READ_FLAG = 0;
-			LIS3DSH_ReadACC(acc);
-			//Calibrate value
-			//Filter calibrated value
-			Set_LEDBrightness(75, 10, 145, 145);
 		}
 	}
 }
-
 /** System Clock Configuration*/
 void SystemClock_Config(void){
 
@@ -141,4 +133,3 @@ void SystemClock_Config(void){
 void assert_failed(uint8_t* file, uint32_t line){
 }
 #endif
-
