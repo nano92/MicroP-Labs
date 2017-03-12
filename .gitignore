@@ -14,4 +14,8 @@ Lab3/Lab3_STM32F4Cube_Base_project/*
 !Lab3/Lab3_STM32F4Cube_Base_project/Sources
 !Lab3/Lab3_STM32F4Cube_Base_project/Headers
 
+Lab4/Lab4_STM32F4Cube_Base_project/*
+!Lab4/Lab4_STM32F4Cube_Base_project/Sources
+!Lab4/Lab4_STM32F4Cube_Base_project/Headers
+
 
