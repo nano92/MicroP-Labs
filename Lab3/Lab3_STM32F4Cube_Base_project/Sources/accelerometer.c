@@ -1,7 +1,8 @@
 /**
   ******************************************************************************
   * File Name          : accelerometer.c
-  * Description        : Reading, filtering and mapping of the accelerometer values
+  * Description        : Reading, filtering and mapping of the accelerometer 
+	*											 values
 	* Authors						 : Juan Carlos Borges, Luis Gallet
   * Group              : 10	
 	* Version            : 1.0.0
@@ -15,15 +16,16 @@
 #include "accelerometer.h"
 #include <math.h>
 
-float ACCX_1[3] = {-0.00096545, -2.56184E-05,	8.70825E-06};
-float ACCX_2[3] = {0.0000223103,	0.001024109,	-0.0000556414};
-float ACCX_3[3] = {-0.0000130817,	-0.00000547623,	0.000979288};
-float ACCX_0[3] = {0.000849161,	-0.003375861,	-0.036292987};
+static float ACCX_1[3] = {-0.00096545, -2.56184E-05,	8.70825E-06};
+static float ACCX_2[3] = {0.0000223103,	0.001024109,	-0.0000556414};
+static float ACCX_3[3] = {-0.0000130817,	-0.00000547623,	0.000979288};
+static float ACCX_0[3] = {0.000849161,	-0.003375861,	-0.036292987};
 
-float COEFF[7] = {0.083333333,	0.125,	0.166666667,	0.25,	0.166666667,	0.125,	0.083333333};
-float X_MEM[7] = {0,0,0,0,0,0,0};
-float Y_MEM[7] = {0,0,0,0,0,0,0};
-float Z_MEM[7] = {0,0,0,0,0,0,0};
+static float COEFF[7] = {0.083333333,	0.125,	0.166666667,	0.25,	0.166666667,	
+													0.125,	0.083333333};
+static float X_MEM[7] = {0,0,0,0,0,0,0};
+static float Y_MEM[7] = {0,0,0,0,0,0,0};
+static float Z_MEM[7] = {0,0,0,0,0,0,0};
 
 /* Function : calibrate
  * Input    : float* acc
@@ -42,7 +44,8 @@ void calibrate(float* acc) {
 /* Function : filter
  * Input    : float currentValue, float* prevValues
  * Returns  : float filteredValue
- * Description: Outputs a filtered value from the previous 6 signal values passed through this system.
+ * Description: Outputs a filtered value from the previous 6 signal values 
+ * passed through this system.
 */
 float filter(float currentValue, float* prevValues) {
 	float filteredValue = 0.0;
@@ -59,7 +62,8 @@ float filter(float currentValue, float* prevValues) {
 /* Function : calculRoll
  * Input    : float x, float y, float z
  * Returns  : float roll
- * Description: Calculates the roll angle on the board based on the positions obtained from the filtered accelerometer values.
+ * Description: Calculates the roll angle on the board based on the positions 
+ * obtained from the filtered accelerometer values.
 */
 float calculRoll (float x, float y, float z) {
 	float roll = atan2(y, (sqrt(x*x+z*z))) * 180.0 / PI;
@@ -79,7 +83,8 @@ float calculRoll (float x, float y, float z) {
 /* Function : calculPitch
  * Input    : float x, float y, float z
  * Returns  : float pitch
- * Description: Calculates the pitch angle on the board based on the positions obtained from the filtered accelerometer values.
+ * Description: Calculates the pitch angle on the board based on the positions 
+ * obtained from the filtered accelerometer values.
 */
 float calculPitch (float x, float y, float z) {
 	float pitch = atan2(x, (sqrt(y*y+z*z))) * 180.0 / PI;
@@ -97,8 +102,8 @@ float calculPitch (float x, float y, float z) {
 }
 
 /* Function : readingACC
- * Description: Reads the values of the accelerometer and then calibrates and filter said values, such that the proper pitch/roll angle can be
- * computed.
+ * Description: Reads the values of the accelerometer and then calibrates and 
+ * filter said values, such that the proper pitch/roll angle can be computed.
 */
 void readingACC(float *values) {
 	float acc[3];

@@ -11,12 +11,11 @@
 #ifndef ACCELEROMETER_H
 #define ACCELEROMETER_H
 
-#define PI 3.14159265358979323846
-
 #include "stm32f4xx_hal.h"
 #include "supporting_functions.h"
 
 
-//extern TIM_HandleTypeDef handle_tim;
+#define PI 3.14159265358979323846
+
 void readingACC(float *values);
 #endif

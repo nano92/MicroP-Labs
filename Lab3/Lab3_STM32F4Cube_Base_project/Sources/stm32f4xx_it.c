@@ -175,21 +175,41 @@ void SysTick_Handler(void)
 /*void PPP_IRQHandler(void)
 {
 }*/
+
+/**
+  * @brief  This function handles Interrupts from external line 9 - 5 Handler.
+  * @param  None
+  * @retval None
+  */
 void EXTI9_5_IRQHandler(void){
+	//This is hanlder is active when user wants to enter new pitch and roll angle
+	//values and it should not be interrupted before it enter the values
 	HAL_NVIC_DisableIRQ(EXTI0_IRQn);
-	HAL_NVIC_DisableIRQ(TIM4_IRQn);
 	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8); 
 }
 
+/**
+  * @brief  This function handles Interrupts from external line 0 Handler.
+  * @param  None
+  * @retval None
+  */
 void EXTI0_IRQHandler(void){
+	//Interrupt from accelerometer must happen only when user is not entering 
+	//values
 	if(INPUT_FLAG == 0){
 		HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0); 	
 	}
 	
 }
 
+/**
+  * @brief  This function is the External Line interrupts Handler
+  * @param  GPIO_PIN that enabled the interrupt
+  * @retval None
+  */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	switch(GPIO_Pin){
+		//Interrupt from keypad
 		case GPIO_PIN_8:{ 
 			uint8_t rise_edge = 1;
 			while(rise_edge){
@@ -199,6 +219,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 			break;
 		}
 		case GPIO_PIN_0:{
+			//Interrupt from accelerometer
 			float angles[2];
 			readingACC(angles);
 			Set_LEDBrightness((int16_t)angles[0], (int16_t)angles[1] , getRoll(), getPitch());

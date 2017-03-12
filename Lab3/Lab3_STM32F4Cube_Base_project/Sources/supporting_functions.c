@@ -61,7 +61,8 @@ void Error_Handler			(uint16_t error_code){
 
 /* Function : LIS3DSH_InterruptConfigStruct
 * Input : LIS3DSH_DRYInterruptConfigTypeDef *LIS3DSH_IntConfigStruct
-* Description : 
+* Description : Enable the accelerometer interrupt signal to be active high and
+* pulsed type
 */
 void LIS3DSH_InterruptConfigStruct(LIS3DSH_DRYInterruptConfigTypeDef *LIS3DSH_IntConfigStruct){
 	LIS3DSH_IntConfigStruct->Dataready_Interrupt = LIS3DSH_DATA_READY_INTERRUPT_ENABLED;

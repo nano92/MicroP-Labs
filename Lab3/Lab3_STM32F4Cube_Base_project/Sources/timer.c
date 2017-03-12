@@ -1,12 +1,28 @@
+/**
+  ******************************************************************************
+  * File Name          : timer.c
+  * Description        : Init Timer in PWM mode and handle its pulse
+	* Authors						 : Luis Gallet
+  * Group              : 10	
+	* Version            : 1.0.0
+	* Date							 : March 10th, 2017
+  ******************************************************************************
+  */
+	
 #include "timer.h"
 
-
 static HAL_StatusTypeDef TIM_PWM_ConfigStart(uint32_t channel);
-static HAL_StatusTypeDef Set_LED_Pulse(int16_t angle, int16_t angle_difference, uint32_t first_channel, uint32_t second_channel);
+static HAL_StatusTypeDef Set_LED_Pulse(int16_t angle, int16_t angle_difference, 
+															uint32_t first_channel, uint32_t second_channel);
 
 TIM_HandleTypeDef handle_tim;
 TIM_OC_InitTypeDef init_OC_tim;
 
+/* Function : Init_TIM_Config
+ * Input    : None
+ * Returns	: HAL status 
+ * Description: Initialize TIM4 timer in PWM mode and enbale it to control LEDs
+*/
 HAL_StatusTypeDef Init_TIM_Config(void){
 	TIM_Base_InitTypeDef init_tim;
 
@@ -18,16 +34,12 @@ HAL_StatusTypeDef Init_TIM_Config(void){
 	
 	init_tim.Prescaler = 117; //0
 	init_tim.CounterMode = TIM_COUNTERMODE_UP;
-	/*
-    Set timer period when it have reset
-    First you have to know max value for timer
-    In our case it is 16bit = 65535
-        
+	/*       
     TIM_Period = timer_tick_frequency / PWM_frequency - 1
     
     In our case, for 2K Hz PWM_frequency, set Period to
     
-    TIM_Period = 84000000 / 2000 - 1 = 41999 (prescalar + 1)*period
+    TIM_Period = 84000000 / 2000 - 1 = 41999 = (prescalar + 1)*period
 */
 	init_tim.Period = 360; //41999
 	init_tim.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -50,7 +62,15 @@ HAL_StatusTypeDef Init_TIM_Config(void){
 	return status;
 }
 
-HAL_StatusTypeDef Set_LEDBrightness(int16_t acc_roll_angle, int16_t acc_pitch_angle, int16_t roll_angle, int16_t pitch_angle){
+/* Function : Set_LEDBrightness
+ * Input    : acc_roll_angle, acc_pitch_angle, roll_angle, pitch_angle
+ * Returns	: HAL status 
+ * Description: Set LED britghtness depending on the angle mesured by the acc 
+ * and the one entered by the user
+*/
+HAL_StatusTypeDef Set_LEDBrightness(int16_t acc_roll_angle, 
+							int16_t acc_pitch_angle, int16_t roll_angle, int16_t pitch_angle){
+	
 	HAL_StatusTypeDef status;
 	
 	int16_t roll_difference = acc_roll_angle - roll_angle;
@@ -86,6 +106,12 @@ HAL_StatusTypeDef Set_LEDBrightness(int16_t acc_roll_angle, int16_t acc_pitch_an
 	return status;
 }
 
+/* Function : Set_LED_Pulse
+ * Input    : angle, angle_difference, first_channel, second_channel
+ * Returns	: HAL status 
+ * Description: Calculates the LED brightness depending on the angle and the
+ * angle difference
+*/
 HAL_StatusTypeDef Set_LED_Pulse(int16_t angle, int16_t angle_difference, uint32_t first_channel, uint32_t second_channel){
 	HAL_StatusTypeDef status;
 	if(angle >= 90 && angle <= 270){
@@ -125,6 +151,11 @@ HAL_StatusTypeDef Set_LED_Pulse(int16_t angle, int16_t angle_difference, uint32_
 	return status;
 }
 
+/* Function : TIM_PWM_ConfigStart
+ * Input    : channel
+ * Returns	: HAL status 
+ * Description: Sets the brightness to the chosen channel(LED)
+*/
 HAL_StatusTypeDef TIM_PWM_ConfigStart(uint32_t channel){
 	HAL_StatusTypeDef status;
 	status = HAL_TIM_PWM_ConfigChannel(&handle_tim, &init_OC_tim, channel);

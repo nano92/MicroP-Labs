@@ -50,17 +50,19 @@ GPIO_InitTypeDef GPIO_Col_Hash;
 GPIO_InitTypeDef GPIO_Row_Hash;
 
 GPIO_InitTypeDef GPIO_Acc;
+GPIO_InitTypeDef GPIOLED_init; 
 
 static const uint16_t Row[4] = {GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, GPIO_PIN_4};
 static const uint16_t Col[4] = {GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8};
-char mapKeypad(int8_t column, int8_t row);
 
-GPIO_InitTypeDef GPIOLED_init; 
+static char mapKeypad(int8_t column, int8_t row);
+
 uint8_t rise_edge = 0;
 uint8_t angle_index = 0;
 
 /* Function: StartKeypadGPIO
- * Description: Initialises the GPIO pins responsible for the detection of the 4 by 4 keypad
+ * Description: Initialises the GPIO pins responsible for the detection of the 
+ * 4 by 4 keypad
  */
 void InitReadButton(void){
 	__HAL_RCC_GPIOD_CLK_ENABLE();
@@ -107,7 +109,8 @@ void InitAccGPIO(void){
 }
 
 /* Function: StartKeypadGPIO
- * Description: Initialises the GPIO pins responsible for the detection of the 4 by 4 keypad
+ * Description: Initialises the GPIO pins responsible for the detection of the 
+ * 4 by 4 keypad
  */
 
 void StartKeypadGPIO(void){
@@ -144,7 +147,8 @@ void DeInitKeypadGPIO(void){
 /* Function : test_keypad()
 * Input : char angle[4];
 * Returns: uint8_t;
-* Definition: Reads and decodes the keypad pressing. Returns a 1 when the # key is pressed
+* Definition: Reads and decodes the keypad pressing. Returns a 1 when the # key 
+* is pressed
 */
 uint8_t test_keypad(char angle[4]){
 	int8_t col_index = -1;
@@ -205,9 +209,10 @@ uint8_t test_keypad(char angle[4]){
 	return 0;
 }
 /* Function : mapKeypad
-	 Input    : int8_t column, int8_t row
-	 Returns  : char value
-   Description : maps the obtained column and row values to the appropiate character in the key pad
+ * Input    : int8_t column, int8_t row
+ * Returns  : char value
+ * Description : maps the obtained column and row values to the appropiate 
+ * character in the key pad
 */
 char mapKeypad(int8_t column, int8_t row) {
 	switch (column) {
