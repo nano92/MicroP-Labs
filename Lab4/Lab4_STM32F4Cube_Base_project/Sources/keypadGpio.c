@@ -57,8 +57,8 @@ static const uint16_t Col[4] = {GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8};
 
 static char mapKeypad(int8_t column, int8_t row);
 
-uint8_t rise_edge = 0;
-uint8_t angle_index = 0;
+static uint8_t rise_edge = 0;
+static uint8_t angle_index = 0;
 
 /* Function: StartKeypadGPIO
  * Description: Initialises the GPIO pins responsible for the detection of the 

@@ -52,7 +52,7 @@ const uint16_t GPIOD_array[8] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3,
 
 const uint16_t GPIOB_array[4] = {GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7};															
 
-uint8_t temp_counter = 0, celsius = 0, rise_edge = 0;
+static uint8_t temp_counter = 0, celsius = 0, rise_edge = 0;
 
 /* Function: Start7SegmentDisplayGPIO
  * Description: Initialises the GPIO pins responsible for the 4 digits 7 segment display
