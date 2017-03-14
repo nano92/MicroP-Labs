@@ -49,6 +49,24 @@ int start_Thread_LED (void) {
 	HAL_GPIO_Init(GPIOD, &LED_configuration);	
 }
 	
+void alarm() {
+	// Takes care of dislpaying the alarm (this is what is done in the previous lab) 
+	// 	const uint16_t LED_array[4] = {GPIO_PIN_12, GPIO_PIN_13, GPIO_PIN_14, GPIO_PIN_15};
+//	if(temp_alarm){
+//		HAL_GPIO_TogglePin(GPIOD, LED_array[led]);
+//		if (temp_counter == 16) {
+//				temp_counter = 0;
+//				led = (led == 4) ? 0 : led+1;
+//		} else {
+//				temp_counter += 1;
+//		}
+//	}else{
+//		for(int8_t i = 0; i < 4; i++){
+//			HAL_GPIO_WritePin(GPIOD, LED_array[i], GPIO_PIN_RESET);
+//		}
+//	}
+}
+	
 /*----------------------------------------------------------------------------
  *      
  *---------------------------------------------------------------------------*/
