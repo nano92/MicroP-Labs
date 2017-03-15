@@ -11,7 +11,9 @@
 #include "stm32f4xx_hal.h"              // Keil::Device:STM32Cube HAL:Common
 #include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
 #include "RTE_Components.h"             // Component selection
-#include "7segmentGpio.h"								// Displays the temperature in the 4 digit 7 segment display
+#include "Thread_7segment.h"								// Displays the temperature in the 4 digit 7 segment display
+#include "Thread_adc.h"
+#include "timer.h"
 
 extern void initializeLED_IO			(void);
 extern void start_Thread_LED			(void);
@@ -77,15 +79,18 @@ int main (void) {
   SystemClock_Config();                     /* Configure the System Clock     */
 
 	/* User codes goes here*/
-	char command[4][9] = {"11000000","11000000","11000000","11000000"};
-	
+	//char command[4][9] = {"11000000","11000000","11000000","11000000"};
+	//Init_TIM3_Config();
   initializeLED_IO();                       /* Initialize LED GPIO Buttons    */
-  start_Thread_LED();                       /* Create LED thread              */
-	Start7SegmentDisplayGPIO();
-	while(1) {
-		DisplayTemperature(command,1);
+  Start7SegmentDisplayGPIO();
+	
+	start_Thread_LED();                       /* Create LED thread              */
+	start_Thread_7segment();
+	start_Thread_adc();
+	//while(1) {
+  //DisplayTemperature(command,1);
 		
-	}
+	//}
 	/* User codes ends here*/
   
 	osKernelStart();                          /* start thread execution         */

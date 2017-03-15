@@ -41,8 +41,8 @@
 #include "main.h"
 #include "stm32f4xx_it.h"
 #include "lis3dsh.h"
-#include "timer.h"
-#include "accelerometer.h"
+//#include "timer.h"
+//#include "accelerometer.h"
 /** @addtogroup STM32F4xx_HAL_Examples
   * @{
   */
@@ -146,7 +146,9 @@ void DebugMon_Handler(void)
 /*void PPP_IRQHandler(void)
 {
 }*/
-
+void TIM3_IRQHandler(void){
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+}
 /**
   * @brief  This function handles Interrupts from external line 9 - 5 Handler.
   * @param  None
@@ -191,9 +193,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 		}
 		case GPIO_PIN_0:{
 			//Interrupt from accelerometer
-			float angles[2];
-			readingACC(angles);
-			Set_LEDBrightness((int16_t)angles[0], (int16_t)angles[1] , getRoll(), getPitch());
+			//float angles[2];
+			//readingACC(angles);
+			//Set_LEDBrightness((int16_t)angles[0], (int16_t)angles[1] , getRoll(), getPitch());
 			break;
 		}
 		default : break;

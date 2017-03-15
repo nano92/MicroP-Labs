@@ -115,12 +115,12 @@ void Init_ACC(void){
 
 /* Function : Init_Read_Keypad()
 * Description : Initialises the GPIOs for the keypad as well as the interrupt to be used for this routine
-*/
+*
 void Init_Read_Keypad(void){
 		InitReadButton();
 		Init_NVIC_Interrupt(EXTI9_5_IRQn, 0, 2);
 }
-
+*/
 /* Function : setPitch()
 * Input : int16_t pitch
 * Description : Sets the pitch value to be acheived that was inputted by the user.
