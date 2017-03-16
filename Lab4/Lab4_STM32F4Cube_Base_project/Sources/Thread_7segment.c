@@ -10,6 +10,7 @@
 #include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
 #include "stm32f4xx_hal.h"
 #include "Thread_7segment.h"
+#include "Thread_adc.h"
 
 void Thread_7segment (void const *argument);             // thread function
 osThreadId tid_Thread_7segement;                         // thread id
@@ -22,7 +23,7 @@ GPIO_InitTypeDef GPIOB_init;
 GPIO_InitTypeDef GPIOA_init;
 
 char TEMP_ALARM = 0;
-char command[4][9] = {"11000000","11000000","11000000","11000000"};
+//char command[4][9] = {"11000000","11000000","11000000","11000000"};
 
 static const uint16_t GPIOD_array[8] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, 
 															GPIO_PIN_4, GPIO_PIN_5 , GPIO_PIN_6, GPIO_PIN_7};
@@ -43,15 +44,28 @@ int start_Thread_7segment (void) {
  *      Thread  'LED_Thread': Toggles LED
  *---------------------------------------------------------------------------*/
 void Thread_7segment (void const *argument) {
+	char command[4][9];
+	memset(command, 0, sizeof(command[0][0]) * 9 * 4);
+	osEvent event;
+	uint32_t *command_ptr;
 	while(1){
 		uint16_t count = 0;
-		if(TEMP_ALARM){
-			osDelay(1000);
+		event = osMessageGet((osMessageQId)getMsgQueueId(), osWaitForever);
+		if(event.status == osEventMessage){
+			for(uint8_t i = 0; i < 4; i++){
+				strcpy(command[i],(char *)event.value.p + i*9);
+				//printf("command from 7segment = %s\n", ((char *)event.value.p + i*9));
+			}
+			DisplayTemperature(command);
+			printf("command from 7segment= %s %s %s %s\n", command[0],command[1], command[2], command[3]);
 		}
-			while(count < 100){
-				DisplayTemperature(command);
-				count++;
-		}
+//		if(TEMP_ALARM){
+//			osDelay(1000);
+//		}
+//			while(count < 100){
+//				DisplayTemperature(command);
+//				count++;
+//		}
 	}
 }
 
