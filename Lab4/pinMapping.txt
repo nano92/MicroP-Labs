@@ -22,6 +22,6 @@ Keypad
 'Row'4	pin 5	Purple			PB14
 
 'Col'1	pin 4	Green			PD9
-'Col'2	pin 7	Grey			PD10
-'Col'3	pin 6	Yellow			PD11
-'Col'4	pin 5	Purple			PD12
+'Col'2	pin 3	Grey			PD10
+'Col'3	pin 2	Yellow			PD11
+'Col'4	pin 1	Purple			PD12
