@@ -24,9 +24,11 @@ GPIO_InitTypeDef GPIOA_init;
 char TEMP_ALARM = 0;
 char command[4][9] = {"11000000","11000000","11000000","11000000"};
 
-static const uint16_t GPIOD_array[8] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, 
+// GPIOs for the 7 segments
+static const uint16_t GPIOD_array[7] = {GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, 
 															GPIO_PIN_4, GPIO_PIN_5 , GPIO_PIN_6, GPIO_PIN_7};
-static const uint16_t GPIOB_array[4] = {GPIO_PIN_3, GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6};															
+// GPIOs for the digit
+static const uint16_t GPIOB_array[4] = {GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7};															
 static uint8_t temp_counter = 0, celsius = 0, rise_edge = 0;
 
 /*----------------------------------------------------------------------------
@@ -64,9 +66,9 @@ void Start7SegmentDisplayGPIO(void){
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	
 	
-	GPIOD_init.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4
+	GPIOD_init.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4
 										| GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 ;
-	GPIOB_init.Pin = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
+	GPIOB_init.Pin = GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
 		
 	GPIOD_init.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIOB_init.Mode = GPIO_MODE_OUTPUT_PP;
@@ -96,14 +98,19 @@ void DisplayTemperature(char command[4][9]){
 		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_RESET);
 		
 		for(uint16_t i = 1400; i > 0; i--){
-			for(int8_t j = 7; j >= 0; j--){
-				if(command[n][7 - j] == '1'){
+			for(int8_t j = 6; j >= 0; j--){
+				if(command[n][6 - j] == '1'){
 					//printf("%c", command[n][i]);
 					HAL_GPIO_WritePin(GPIOD, GPIOD_array[j], GPIO_PIN_RESET);
 				}else{
 					//printf("%c", command[n][i]);
 					HAL_GPIO_WritePin(GPIOD, GPIOD_array[j], GPIO_PIN_SET);
 				}
+			}
+			if(command[n][7] == '1') {
+				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+			} else {
+				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
 			}
 		}	
 		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_SET);		//printf("\n");
@@ -124,6 +131,7 @@ void turnOffDisplay(void) {
 			for(int8_t i = 7; i >= 0; i--){
 					HAL_GPIO_WritePin(GPIOD, GPIOD_array[i], GPIO_PIN_SET);
 			}
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
 		}	
 		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_SET);
 	}
