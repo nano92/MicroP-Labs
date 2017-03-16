@@ -11,6 +11,7 @@
 #include "stm32f4xx_hal.h"
 #include "Thread_7segment.h"
 #include "Thread_adc.h"
+#include "Thread_keypad.h"
 
 void Thread_7segment (void const *argument);             // thread function
 osThreadId tid_Thread_7segement;                         // thread id
@@ -21,13 +22,11 @@ static void turnOffDisplay(void);
 GPIO_InitTypeDef GPIOD_init;
 GPIO_InitTypeDef GPIOB_init;
 GPIO_InitTypeDef GPIOA_init;
-
-char TEMP_ALARM = 0;
 //char command[4][9] = {"11000000","11000000","11000000","11000000"};
 
 // GPIOs for the 7 segments
-static const uint16_t GPIOD_array[7] = {GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, 
-															GPIO_PIN_4, GPIO_PIN_5 , GPIO_PIN_6, GPIO_PIN_7};
+static const uint16_t GPIOD_array[8] = {GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, 
+															GPIO_PIN_4, GPIO_PIN_5 , GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8};
 // GPIOs for the digit
 static const uint16_t GPIOB_array[4] = {GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7};															
 static uint8_t temp_counter = 0, celsius = 0, rise_edge = 0;
@@ -38,7 +37,8 @@ static uint8_t temp_counter = 0, celsius = 0, rise_edge = 0;
 int start_Thread_7segment (void) {
 
   tid_Thread_7segement = osThreadCreate(osThread(Thread_7segment ), NULL); // Start LED_Thread
-  if (!tid_Thread_7segement) return(-1); 
+  printf("Thread ID = %d\n", (int)tid_Thread_7segement);
+	if (!tid_Thread_7segement) return(-1); 
   return(0);
 }
 
@@ -48,19 +48,37 @@ int start_Thread_7segment (void) {
 void Thread_7segment (void const *argument) {
 	char command[4][9];
 	memset(command, 0, sizeof(command[0][0]) * 9 * 4);
-	osEvent event;
-	uint32_t *command_ptr;
+	osEvent event_adc, event_alarm, event_keypad;
+	uint8_t alarm = 1;
 	while(1){
+		uint8_t alarm_delay = 160;
 		uint16_t count = 0;
-		event = osMessageGet((osMessageQId)getMsgQueueId(), osWaitForever);
-		if(event.status == osEventMessage){
-			for(uint8_t i = 0; i < 4; i++){
-				strcpy(command[i],(char *)event.value.p + i*9);
-				//printf("command from 7segment = %s\n", ((char *)event.value.p + i*9));
+		
+		if(ANGLE_FLAG == 0){
+			event_adc = osMessageGet((osMessageQId)getADCMsgQueueId(), osWaitForever);
+			event_alarm = osMessageGet((osMessageQId)getAlarmMsgQueueId(), osWaitForever);
+			
+			if(event_adc.status == osEventMessage || event_alarm.status == osEventMessage){
+				alarm = (uint8_t)event_alarm.value.p;
+				alarm_delay = (alarm == 2) ? alarm_delay >> 2 : alarm_delay;
+				for(uint8_t i = 0; i < 4; i++){
+					strcpy(command[i],(char *)event_adc.value.p + i*9);
+					//printf("command from 7segment = %s\n", ((char *)event.value.p + i*9));
+				}	
 			}
-			DisplayTemperature(command);
-			printf("command from 7segment= %s %s %s %s\n", command[0],command[1], command[2], command[3]);
+		}else if(ANGLE_FLAG == 1){
+			event_keypad = osMessageGet((osMessageQId)getKeyPadMsgQueueId(), osWaitForever);
+			if(event_keypad.status == osEventMessage){
+				for(uint8_t i = 0; i < 4; i++){
+					strcpy(command[i],(char *)event_keypad.value.p + i*9);
+				}	
+			}
 		}
+		while(count < alarm_delay){
+			DisplayTemperature(command);
+			count++;
+		}
+	}
 //		if(TEMP_ALARM){
 //			osDelay(1000);
 //		}
@@ -68,7 +86,7 @@ void Thread_7segment (void const *argument) {
 //				DisplayTemperature(command);
 //				count++;
 //		}
-	}
+	
 }
 
 /* Function: Start7SegmentDisplayGPIO
@@ -81,8 +99,8 @@ void Start7SegmentDisplayGPIO(void){
 	
 	
 	GPIOD_init.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4
-										| GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 ;
-	GPIOB_init.Pin = GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
+										| GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 ;
+	GPIOB_init.Pin = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
 		
 	GPIOD_init.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIOB_init.Mode = GPIO_MODE_OUTPUT_PP;
@@ -105,15 +123,15 @@ void Start7SegmentDisplayGPIO(void){
 void DisplayTemperature(char command[4][9]){	
 	// Displaying the command in 7 segment display
 	for(int8_t d = 0; d < 4; d++){
-		HAL_GPIO_WritePin(GPIOB, GPIOB_array[d], GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOB, GPIOB_array[d], GPIO_PIN_RESET);
 	}
 		
 	for(int8_t n = 0; n < 4; n++){
-		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_SET);
 		
 		for(uint16_t i = 1400; i > 0; i--){
-			for(int8_t j = 6; j >= 0; j--){
-				if(command[n][6 - j] == '1'){
+			for(int8_t j = 7; j >= 0; j--){
+				if(command[n][7 - j] == '1'){
 					//printf("%c", command[n][i]);
 					HAL_GPIO_WritePin(GPIOD, GPIOD_array[j], GPIO_PIN_RESET);
 				}else{
@@ -121,13 +139,8 @@ void DisplayTemperature(char command[4][9]){
 					HAL_GPIO_WritePin(GPIOD, GPIOD_array[j], GPIO_PIN_SET);
 				}
 			}
-			if(command[n][7] == '1') {
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
-			} else {
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
-			}
 		}	
-		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_SET);		//printf("\n");
+		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_RESET);		//printf("\n");
 		/*if(temp_alarm){
 			//turnOffDisplay();
 		}*/

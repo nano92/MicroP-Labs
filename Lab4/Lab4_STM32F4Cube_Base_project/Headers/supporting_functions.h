@@ -27,9 +27,12 @@
 #define EXTI_SPI1_FAIL				((uint16_t) 5)
 
 void Error_Handler						(uint16_t error_code);
+
+void Decoding(int8_t number, char segment[9]);
+
 void LIS3DSH_InterruptConfigStruct(LIS3DSH_DRYInterruptConfigTypeDef *LIS3DSH_IntConfigStruct);
 void Init_NVIC_Interrupt(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubPriority);
-void KeyBouncingDelay(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_state, uint8_t* coord, uint8_t rise_edge, uint8_t reset);
+void KeyBouncingDelay(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_state, int8_t* coord, uint8_t rise_edge, uint8_t reset);
 void Init_ACC(void);
 void Init_Read_Keypad(void);
 void setPitch(int16_t pitch);

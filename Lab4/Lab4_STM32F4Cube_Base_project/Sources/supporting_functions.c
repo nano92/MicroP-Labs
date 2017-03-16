@@ -59,6 +59,30 @@ void Error_Handler			(uint16_t error_code){
 	}
 }
 
+/* Function : Decoding
+ * Input    : int8_t number
+ * Output   : char segment[9]
+ * Description : Decodes the integer value into the array of bits that will generate the number in the 7 segment display.
+ * Where the most significant bit is the poitn and the least significant bit is A
+ */
+void Decoding(int8_t number, char segment[9]){
+	switch (number) {
+			case 0   : strcpy(segment, "11000000\0"); break;
+			case 1   : strcpy(segment, "11111001\0"); break;
+			case 2   : strcpy(segment, "10100100\0"); break;
+			case 3   : strcpy(segment, "10110000\0"); break;
+			case 4   : strcpy(segment, "10011001\0"); break;
+			case 5   : strcpy(segment, "10010010\0"); break;
+			case 6   : strcpy(segment, "10000010\0"); break;
+			case 7   : strcpy(segment, "11111000\0"); break;
+			case 8   : strcpy(segment, "10000000\0"); break;
+			case 9   : strcpy(segment, "10011000\0"); break;
+			case 10  : strcpy(segment, "10111111\0"); break;
+			default  : strcpy(segment, "11111111\0");// Off
+	}
+	
+}
+
 /* Function : LIS3DSH_InterruptConfigStruct
 * Input : LIS3DSH_DRYInterruptConfigTypeDef *LIS3DSH_IntConfigStruct
 * Description : Enable the accelerometer interrupt signal to be active high and
@@ -83,7 +107,7 @@ void Init_NVIC_Interrupt(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubP
 * Input: GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_state, uint8_t rise_edge
 * Description: Function in charge of elliminating the key debouncing when the keypad buttons are pressed.
 */
-void KeyBouncingDelay(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_state, uint8_t* coord, uint8_t rise_edge, uint8_t reset){
+void KeyBouncingDelay(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_state, int8_t* coord, uint8_t rise_edge, uint8_t reset){
 	int16_t button_counter = 0;
 	while(rise_edge) {
 		rise_edge = (HAL_GPIO_ReadPin(GPIOx, GPIO_Pin) == pin_state);
@@ -91,7 +115,7 @@ void KeyBouncingDelay(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_
 			button_counter++;
 		}
 	}
-	if (button_counter > 500) {
+	if (button_counter > 20000) {
 		reset = 2;
 	} else {
 		reset = 0;
