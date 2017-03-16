@@ -26,7 +26,7 @@ char command[4][9] = {"11000000","11000000","11000000","11000000"};
 
 static const uint16_t GPIOD_array[8] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, 
 															GPIO_PIN_4, GPIO_PIN_5 , GPIO_PIN_6, GPIO_PIN_7};
-static const uint16_t GPIOB_array[4] = {GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7};															
+static const uint16_t GPIOB_array[4] = {GPIO_PIN_3, GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6};															
 static uint8_t temp_counter = 0, celsius = 0, rise_edge = 0;
 
 /*----------------------------------------------------------------------------
