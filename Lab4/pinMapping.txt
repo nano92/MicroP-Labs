@@ -1,0 +1,27 @@
+4 digit - 7 segment
+
+A 	pin 14 	Red			PD1
+B 	pin 16 	Orange			PD2
+C 	pin 13 	White			PD3
+D 	pin 3  	Yellow			PD4
+E 	pin 5  	Green			PD5
+F 	pin 11 	Grey			PD6
+G 	pin 15  Purple			PD7
+Point  	pin 7	Red			PB3
+
+Digit1	pin 1	Green-resistor-Green	PB4
+Digit2	pin 2	Black-resitor-Gray	PB5
+Digit3	pin 6	Blue-resitor-Blue	PB6
+Digit4	pin 8	Orange-resistor-Orange	PB7
+
+Keypad
+
+'Row'1	pin 8	Green			PB11
+'Row'2	pin 7	Grey			PB12
+'Row'3	pin 6	Yellow			PB13
+'Row'4	pin 5	Purple			PB14
+
+'Col'1	pin 4	Green			PD9
+'Col'2	pin 3	Grey			PD10
+'Col'3	pin 2	Yellow			PD11
+'Col'4	pin 1	Purple			PD12

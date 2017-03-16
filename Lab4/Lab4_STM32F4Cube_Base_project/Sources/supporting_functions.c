@@ -83,9 +83,18 @@ void Init_NVIC_Interrupt(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubP
 * Input: GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_state, uint8_t rise_edge
 * Description: Function in charge of elliminating the key debouncing when the keypad buttons are pressed.
 */
-void KeyBouncingDelay(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_state, uint8_t rise_edge){
+void KeyBouncingDelay(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState pin_state, uint8_t* coord, uint8_t rise_edge, uint8_t reset){
+	int16_t button_counter = 0;
 	while(rise_edge) {
 		rise_edge = (HAL_GPIO_ReadPin(GPIOx, GPIO_Pin) == pin_state);
+		if ((coord[1] == 0) && (coord[1] == 3)) {
+			button_counter++;
+		}
+	}
+	if (button_counter > 500) {
+		reset = 2;
+	} else {
+		reset = 0;
 	}
 }
 
