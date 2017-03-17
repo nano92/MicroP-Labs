@@ -73,73 +73,75 @@ void Thread_keypad (void const *argument) {
 		osDelay(1000);
 		stat = read_keypad(coord);
 		printf("coord = [col_%d, row_%d]\n", coord[0], coord[1]);
-		switch(stat) {
-			case 0 : if(reading) {
-					char button = mapKeypad(coord[0], coord[1]);
-					if(button == 'D'){
-						if(angle_index > 0){
-							angle_index--;
-							angle[counter][angle_index] = '\0';
+		if(coord[0] != -1) {
+			switch(stat) {
+				case 0 : if(reading) {
+						char button = mapKeypad(coord[0], coord[1]);
+						if(button == 'D'){
+							if(angle_index > 0){
+								angle_index--;
+								angle[counter][angle_index] = '\0';
+							}
+						}else if((angle_index < 3) && (button != NULL)){
+							angle[counter][angle_index] = button;				
+							angle_index++;
+							number = button - '0';
+							Decoding(number, command[command_index]);
+							command_index++;
+						}else {
+							switch(coord[1]) {
+								case 0 : {
+									printf("row = %d\n", coord[1]);
+									keyPad_queue_id = osMessageCreate(osMessageQ(keyPad_msg_queue), NULL);
+									setKeyPadMsgQueueId(keyPad_queue_id);
+									osMessagePut(keyPad_queue_id, (uint32_t)(command), osWaitForever);
+									ANGLE_FLAG = 1;
+									osDelay(140);
+									// Functionality of keypad when reading A, B, C, D
+								}; break;
+								case 1 : {
+									ANGLE_FLAG = 0;
+								}; break;
+								default : ANGLE_FLAG = 0;							
+							}
 						}
-					}else if((angle_index < 3) && (button != NULL)){
-						angle[counter][angle_index] = button;				
-						angle_index++;
-						number = button - '0';
-						Decoding(number, command[command_index]);
-						command_index++;
-					}else {
-						switch(coord[1]) {
-							case 0 : {
-							printf("row = %d\n", coord[1]);
-							keyPad_queue_id = osMessageCreate(osMessageQ(keyPad_msg_queue), NULL);
-							setKeyPadMsgQueueId(keyPad_queue_id);
-							osMessagePut(keyPad_queue_id, (uint32_t)(command), osWaitForever);
-							ANGLE_FLAG = 1;
-							osDelay(140);
-							// Functionality of keypad when reading A, B, C, D
-							}; break;
-							case 1 : {
-								ANGLE_FLAG = 0;
-							}; break;
-							default : ANGLE_FLAG = 0;							
-						}
+					} else {
+						// Functionality of keypad when not reading
+				}; break;
+				case 1 : if(counter == -1){
+					reading = 1;
+					counter++;
+				} else if (counter == 1){
+					reading = 0;
+					counter = -1;
+					angle_index = 0;
+					memset(angle, '\0', sizeof(angle[0][0]) * 2 * 4);
+					command_index = 0;
+					for(uint8_t i = 0; i < 4; i++){
+						Decoding(-1, command[i]);
 					}
 				} else {
-					// Functionality of keypad when not reading
-			}; break;
-			case 1 : if(counter == -1){
-				reading = 1;
-				counter++;
-			} else if (counter == 1){
-				reading = 0;
-				counter = -1;
-				angle_index = 0;
-				memset(angle, '\0', sizeof(angle[0][0]) * 2 * 4);
-				command_index = 0;
-				for(uint8_t i = 0; i < 4; i++){
-					Decoding(-1, command[i]);
-				}
-			} else {
-				angle_index = 0;
-				counter ++;
-			}; break;
-			case 2 : {// Reset everyting
-				reading = 0;
-				counter = -1;
-				memset(angle, '\0', sizeof(angle[0][0]) * 2 * 4);
-				number = -1;
-				angle_index = 0;
-				command_index = 0;
-				for(uint8_t i = 0; i < 4; i++){
-					Decoding(-1, command[i]);
-				}
-			}; break;			
-			default : printf("Angle[%d] = %s\n", counter, angle[counter]); 
+					angle_index = 0;
+					counter ++;
+				}; break;
+				case 2 : {// Reset everyting
+					reading = 0;
+					counter = -1;
+					memset(angle, '\0', sizeof(angle[0][0]) * 2 * 4);
+					number = -1;
+					angle_index = 0;
+					command_index = 0;
+					for(uint8_t i = 0; i < 4; i++){
+						Decoding(-1, command[i]);
+					}
+				}; break;			
+				default : printf("Angle[%d] = %s\n", counter, angle[counter]); 
+			}
+			coord[0] = -1;
+			coord[1] = -1;
+			if(counter > -1)
+				printf("Angle[%d] = %s\n", counter, angle[counter]);
 		}
-		coord[0] = -1;
-		coord[1] = -1;
-		if(counter > -1)
-			printf("Angle[%d] = %s\n", counter, angle[counter]);
 	}
 }
 
