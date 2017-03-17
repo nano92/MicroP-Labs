@@ -23,4 +23,5 @@ void StartLEDGPIO(void);
 void InitAccGPIO(void);
 osMessageQId getPitchACCMsgQueueId(void);
 osMessageQId getRollACCMsgQueueId(void);
+osThreadId getACCThreadId(void);
 #endif

@@ -64,19 +64,20 @@ void Thread_accelerometer(void const *argument) {
 	float roll, pitch;
 	int16_t counter = 0;
 	while(1) {
+		osSignalWait(0x0002, osWaitForever);
 		readingACC(values);
 		roll = values[0];
 		pitch = values[1];
-		Set_LEDBrightness(roll, pitch);
-		if(counter == 33) {		
-			pitchACC_queue_id = osMessageCreate(osMessageQ(pitchACC_msg_queue), NULL);
-			rollACC_queue_id = osMessageCreate(osMessageQ(rollACC_msg_queue), NULL);
-			setPitchACCMsgQueueId(pitchACC_queue_id);
-			setRollACCMsgQueueId(rollACC_queue_id);
-			osMessagePut(pitchACC_queue_id, (uint32_t)pitch, osWaitForever);
-			osMessagePut(rollACC_queue_id, (uint32_t)roll, osWaitForever);
-			counter = 0;
-		}
+		Set_LEDBrightness(roll, pitch, getRoll(), getPitch(), &handle_tim4);
+//		if(counter == 33) {		
+//			pitchACC_queue_id = osMessageCreate(osMessageQ(pitchACC_msg_queue), NULL);
+//			rollACC_queue_id = osMessageCreate(osMessageQ(rollACC_msg_queue), NULL);
+//			setPitchACCMsgQueueId(pitchACC_queue_id);
+//			setRollACCMsgQueueId(rollACC_queue_id);
+//			osMessagePut(pitchACC_queue_id, (uint32_t)pitch, osWaitForever);
+//			osMessagePut(rollACC_queue_id, (uint32_t)roll, osWaitForever);
+//			counter = 0;
+//		}
 		
 	}
 	
@@ -191,6 +192,7 @@ void InitAccGPIO(void){
  * Description: Initialises the GPIO pins responsible for the 4 LED used for the temperature alarm
  */
 void StartLEDGPIO(void){
+	__HAL_RCC_GPIOD_CLK_ENABLE();
 	GPIOLED_init.Pin = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
 	GPIOLED_init.Mode = GPIO_MODE_AF_PP;
 	GPIOLED_init.Pull = GPIO_PULLDOWN;
@@ -212,4 +214,8 @@ void setRollACCMsgQueueId(osMessageQId msg_Id){
 
 osMessageQId getRollACCMsgQueueId(void){
 	return shared_rollACCmsg_q_id;
+}
+
+osThreadId getACCThreadId(void){
+	return tid_Thread_accelerometer;
 }

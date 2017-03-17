@@ -48,7 +48,6 @@ static uint8_t angle_index = 0;
 char ANGLE_FLAG = 0;
 char reading = 0;
 
-int16_t pitch_angle = 0, roll_angle = 0;
 /*----------------------------------------------------------------------------
  *      Create the thread within RTOS context
  *---------------------------------------------------------------------------*/
@@ -63,6 +62,9 @@ int start_Thread_keypad (void) {
  *---------------------------------------------------------------------------*/
 void Thread_keypad (void const *argument) {
 	StartKeypadGPIO();
+	
+	int16_t pitch_angle = 0, roll_angle = 0;
+	
 	uint8_t stat = 0;
 	char angle[2][4];
 	memset(angle, '\0', sizeof(angle[0][0]) * 2 * 4);
@@ -119,11 +121,17 @@ void Thread_keypad (void const *argument) {
 					state = 2; // read keypad
 					counter++;
 				} else if (counter == 1){ // Finish inputting roll angle
+					roll_angle = atoi(angle[counter]);
+					printf("roll angle = %d\n", roll_angle);
+					setRoll(roll_angle);
 					resetParameters(counter, command_index, command);
 					state = 1;
 					reading = 0;
 					//Send acc
 				} else { // Finish inputting pitch angle, start inputting roll angle
+					pitch_angle = atoi(angle[counter]);
+					printf("pitch angle = %d\n", pitch_angle);
+					setPitch(pitch_angle);
 					angle_index = 0;
 					counter ++;
 				}; break;

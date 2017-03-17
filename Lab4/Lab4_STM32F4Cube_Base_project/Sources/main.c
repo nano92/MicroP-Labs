@@ -14,6 +14,7 @@
 #include "Thread_7segment.h"								// Displays the temperature in the 4 digit 7 segment display
 #include "Thread_adc.h"
 #include "Thread_keypad.h"
+#include "Thread_accelerometer.h"
 #include "timer.h"
 
 char LED_FLAG;
@@ -85,15 +86,15 @@ int main (void) {
 
 	/* User codes goes here*/
 	//char command[4][9] = {"11000000","11000000","11000000","11000000"};
-	Init_TIM3_Config(&handle_time3);
-	Init_TIM4_Config(&handle_tim4);
+	//Init_TIM3_Config(&handle_time3);
+	//Init_TIM4_Config(&handle_tim4);
   //initializeLED_IO();                       /* Initialize LED GPIO Buttons    */
 	
 	//start_Thread_LED();                       /* Create LED thread              */
 	start_Thread_keypad();
-	start_Thread_adc();
-	start_Thread_7segment();
-	
+	//start_Thread_adc();
+	//start_Thread_7segment();
+	//start_Thread_accelerometer();
 	
 	//while(1) {
   //DisplayTemperature(command,1);
