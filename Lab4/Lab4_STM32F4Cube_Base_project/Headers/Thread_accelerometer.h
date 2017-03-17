@@ -21,4 +21,6 @@ void readingACC(float *values);
 int start_Thread_keypad (void);
 void StartLEDGPIO(void);
 void InitAccGPIO(void);
+osMessageQId getPitchACCMsgQueueId(void);
+osMessageQId getRollACCMsgQueueId(void);
 #endif

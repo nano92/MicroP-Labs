@@ -30,8 +30,10 @@ osMessageQId shared_rollACCmsg_q_id;
 osMessageQDef(rollACC_msg_queue, 16, char*);
 osMessageQId (rollACC_queue_id);
 
-void setACCMsgQueueId(osMessageQId msg_Id);
-osMessageQId getACCMsgQueueId(void);
+void setPitchACCMsgQueueId(osMessageQId msg_Id);
+osMessageQId getPitchACCMsgQueueId(void);
+void setRollACCMsgQueueId(osMessageQId msg_Id);
+osMessageQId getRollACCMsgQueueId(void);
 
 static float ACCX_1[3] = {-0.00096545, -2.56184E-05,	8.70825E-06};
 static float ACCX_2[3] = {0.0000223103,	0.001024109,	-0.0000556414};
@@ -66,12 +68,13 @@ void Thread_accelerometer(void const *argument) {
 		if(counter == 33) {		
 			pitchACC_queue_id = osMessageCreate(osMessageQ(pitchACC_msg_queue), NULL);
 			rollACC_queue_id = osMessageCreate(osMessageQ(rollACC_msg_queue), NULL);
-			setACCMsgQueueId(pitcACC_queue_id);
-			setACCMsgQueueId(rollACC_queue_id);
-			osMessagePut(tiltACC_queue_id, pitch, osWaitForever);
+			setPitchACCMsgQueueId(pitchACC_queue_id);
+			setRollACCMsgQueueId(rollACC_queue_id);
+			osMessagePut(pitchACC_queue_id, pitch, osWaitForever);
 			osMessagePut(rollACC_queue_id, roll, osWaitForever);
+			counter = 0;
 		}
-		printf("Roll = %f\tPitch = %f\n",roll,pitch);
+		
 	}
 	
 }
@@ -192,10 +195,17 @@ void StartLEDGPIO(void){
 	
 	HAL_GPIO_Init(GPIOD, &GPIOLED_init);
 }
-void setACCMsgQueueId(osMessageQId msg_Id){
-	shared_ACCmsg_q_id = msg_Id;
+void setPitchACCMsgQueueId(osMessageQId msg_Id){
+	shared_pitchACCmsg_q_id = msg_Id;
 }
 
-osMessageQId getACCMsgQueueId(void){
-	return shared_ACCmsg_q_id;
+osMessageQId getPitchACCMsgQueueId(void){
+	return shared_pitchACCmsg_q_id;
+}
+void setRollACCMsgQueueId(osMessageQId msg_Id){
+	shared_rollACCmsg_q_id = msg_Id;
+}
+
+osMessageQId getRollACCMsgQueueId(void){
+	return shared_rollACCmsg_q_id;
 }
