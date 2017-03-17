@@ -21,9 +21,6 @@ GPIO_InitTypeDef GPIO_Col_init;
 GPIO_InitTypeDef GPIO_Col_Hash;
 GPIO_InitTypeDef GPIO_Row_Hash;
 
-GPIO_InitTypeDef GPIO_Acc;
-GPIO_InitTypeDef GPIOLED_init; 
-
 static const uint16_t Row[4] = {GPIO_PIN_11, GPIO_PIN_12, GPIO_PIN_13, GPIO_PIN_14};
 static const uint16_t Col[4] = {GPIO_PIN_9, GPIO_PIN_10, GPIO_PIN_11, GPIO_PIN_12};
 
@@ -82,20 +79,6 @@ void DeInitReadButton(void){
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);
 	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_13);
 	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_12);
-}
-
-/* Function: InitAccGPIO()
-* Description: Initialises the accelerometer gpio pins
-*/
-void InitAccGPIO(void){
-	__HAL_RCC_GPIOE_CLK_ENABLE();
-	
-	GPIO_Acc.Pin = GPIO_PIN_0;
-	GPIO_Acc.Mode = GPIO_MODE_IT_RISING;
-	GPIO_Acc.Pull = GPIO_PULLDOWN;
-	GPIO_Acc.Speed = GPIO_SPEED_FREQ_LOW;
-	
-	HAL_GPIO_Init(GPIOE, &GPIO_Acc);
 }
 
 /* Function: StartKeypadGPIO
@@ -232,16 +215,4 @@ char mapKeypad(int8_t column, int8_t row) {
 		default : return NULL;
 	}		
 
-}
-/* Function: StartLEDGPIO
- * Description: Initialises the GPIO pins responsible for the 4 LED used for the temperature alarm
- */
-void StartLEDGPIO(void){
-	GPIOLED_init.Pin = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
-	GPIOLED_init.Mode = GPIO_MODE_AF_PP;
-	GPIOLED_init.Pull = GPIO_PULLDOWN;
-	GPIOLED_init.Speed = GPIO_SPEED_FREQ_MEDIUM;
-	GPIOLED_init.Alternate = GPIO_AF2_TIM4;
-	
-	HAL_GPIO_Init(GPIOD, &GPIOLED_init);
 }
