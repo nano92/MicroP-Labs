@@ -12,6 +12,7 @@
 
 #include "stdint.h"
 #include "lis3dsh.h"
+#include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -25,6 +26,7 @@
 #define ADC_CH_CONFIG_FAIL		((uint16_t) 3)
 #define ADC_MULTIMODE_FAIL		((uint16_t) 4)
 #define EXTI_SPI1_FAIL				((uint16_t) 5)
+#define osFeature_Signals 4
 
 void Error_Handler						(uint16_t error_code);
 

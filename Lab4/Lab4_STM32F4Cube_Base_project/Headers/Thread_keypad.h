@@ -6,7 +6,6 @@
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_it.h"
 #include "supporting_functions.h"
-#include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
 #include "stm32f4xx_hal.h"
 
 extern char ANGLE_FLAG;
