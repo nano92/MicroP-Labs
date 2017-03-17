@@ -23,6 +23,16 @@ void Thread_accelerometer(void const *argument);
 osThreadId tid_Thread_accelerometer;                         // thread id
 osThreadDef(Thread_accelerometer, osPriorityNormal, 1, 0);
 
+osMessageQId shared_pitchACCmsg_q_id;
+osMessageQDef(pitchACC_msg_queue, 16, char*);
+osMessageQId (pitchACC_queue_id);
+osMessageQId shared_rollACCmsg_q_id;
+osMessageQDef(rollACC_msg_queue, 16, char*);
+osMessageQId (rollACC_queue_id);
+
+void setACCMsgQueueId(osMessageQId msg_Id);
+osMessageQId getACCMsgQueueId(void);
+
 static float ACCX_1[3] = {-0.00096545, -2.56184E-05,	8.70825E-06};
 static float ACCX_2[3] = {0.0000223103,	0.001024109,	-0.0000556414};
 static float ACCX_3[3] = {-0.0000130817,	-0.00000547623,	0.000979288};
@@ -48,10 +58,19 @@ void Thread_accelerometer(void const *argument) {
 	Init_ACC();
 	float values[2];
 	float roll, pitch;
+	int16_t counter = 0;
 	while(1) {
 		readingACC(values);
 		roll = values[0];
 		pitch = values[1];
+		if(counter == 33) {		
+			pitchACC_queue_id = osMessageCreate(osMessageQ(pitchACC_msg_queue), NULL);
+			rollACC_queue_id = osMessageCreate(osMessageQ(rollACC_msg_queue), NULL);
+			setACCMsgQueueId(pitcACC_queue_id);
+			setACCMsgQueueId(rollACC_queue_id);
+			osMessagePut(tiltACC_queue_id, pitch, osWaitForever);
+			osMessagePut(rollACC_queue_id, roll, osWaitForever);
+		}
 		printf("Roll = %f\tPitch = %f\n",roll,pitch);
 	}
 	
@@ -172,4 +191,11 @@ void StartLEDGPIO(void){
 	GPIOLED_init.Alternate = GPIO_AF2_TIM4;
 	
 	HAL_GPIO_Init(GPIOD, &GPIOLED_init);
+}
+void setACCMsgQueueId(osMessageQId msg_Id){
+	shared_ACCmsg_q_id = msg_Id;
+}
+
+osMessageQId getACCMsgQueueId(void){
+	return shared_ACCmsg_q_id;
 }
