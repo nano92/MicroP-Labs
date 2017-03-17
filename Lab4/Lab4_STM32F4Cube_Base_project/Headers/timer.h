@@ -15,7 +15,7 @@
 
 //extern TIM_HandleTypeDef handle_tim;
 
-HAL_StatusTypeDef Init_TIM4_Config(void);
-HAL_StatusTypeDef Init_TIM3_Config(void);
-HAL_StatusTypeDef Set_LEDBrightness(int16_t acc_angle, int16_t acc_pitch_angle, int16_t roll_angle, int16_t pitch_angle);
+HAL_StatusTypeDef Init_TIM4_Config(TIM_HandleTypeDef *handle_tim4);
+HAL_StatusTypeDef Init_TIM3_Config(TIM_HandleTypeDef *handle_time3);
+HAL_StatusTypeDef Set_LEDBrightness(int16_t acc_roll_angle, int16_t acc_pitch_angle, int16_t roll_angle, int16_t pitch_angle, TIM_HandleTypeDef *handle_tim4);
 #endif

@@ -15,6 +15,9 @@ osThreadDef(Thread_keypad, osPriorityNormal, 1, 0);
 osMessageQId shared_KeyPadmsg_q_id;
 osMessageQDef(keyPad_msg_queue, 16, char*);
 osMessageQId (keyPad_queue_id);
+osMessageQId shared_Statemsg_q_id;
+osMessageQDef(state_msg_queue, 16, char*);
+osMessageQId (state_queue_id);
 
 static void InitReadButton(void);
 static void InitAccGPIO(void);
@@ -24,6 +27,9 @@ static void DeInitKeypadGPIO(void);
 static uint8_t read_keypad(int8_t coord[2]);
 static void StartLEDGPIO(void);
 static void setKeyPadMsgQueueId(osMessageQId msg_Id);
+static void setStateMsgQueueId(osMessageQId msg_Id);
+uint32_t setState (uint8_t pos, uint32_t state);
+void resetParameters (int8_t counter, uint8_t command_index, char command[4][9]);
 
 GPIO_InitTypeDef GPIO_Row_init;
 GPIO_InitTypeDef GPIO_Col_init;
@@ -40,7 +46,9 @@ static uint8_t rise_edge = 0;
 static uint8_t angle_index = 0;
 
 char ANGLE_FLAG = 0;
+char reading = 0;
 
+int16_t pitch_angle = 0, roll_angle = 0;
 /*----------------------------------------------------------------------------
  *      Create the thread within RTOS context
  *---------------------------------------------------------------------------*/
@@ -64,85 +72,95 @@ void Thread_keypad (void const *argument) {
 		Decoding(-1, command[i]);
 	}
 	
+	char temp_command[9];
 	int8_t coord[2] = {-1,-1};
-	char reading = 0;
 	int8_t counter = -1;
 	int8_t number = -1;
 	uint8_t command_index = 0;
+	
+	keyPad_queue_id = osMessageCreate(osMessageQ(keyPad_msg_queue), NULL);
+	setKeyPadMsgQueueId(keyPad_queue_id);
+	
+	state_queue_id = osMessageCreate(osMessageQ(state_msg_queue), NULL);
+	setStateMsgQueueId(state_queue_id);
+	
+	uint8_t state = 1;
 	while(1){
-		osDelay(1000);
+		osMessagePut(state_queue_id, (uint32_t)state, osWaitForever);
+		osMessagePut(keyPad_queue_id, (uint32_t)(command), osWaitForever);
 		stat = read_keypad(coord);
 		printf("coord = [col_%d, row_%d]\n", coord[0], coord[1]);
-		if(coord[0] != -1) {
+		if(coord[0] != -1){
 			switch(stat) {
 				case 0 : if(reading) {
 						char button = mapKeypad(coord[0], coord[1]);
-						if(button == 'D'){
-							if(angle_index > 0){
-								angle_index--;
-								angle[counter][angle_index] = '\0';
-							}
-						}else if((angle_index < 3) && (button != NULL)){
+						if(button == 'D'){ // Delete: Key *
+								if(angle_index > 0){
+									angle_index--;
+									angle[counter][angle_index] = '\0';
+								}
+						} else if((angle_index < 3) && (button != NULL)){ // Keys: 0 - 9
 							angle[counter][angle_index] = button;				
 							angle_index++;
 							number = button - '0';
-							Decoding(number, command[command_index]);
+							Decoding(number, temp_command);
+							strcpy(command[command_index], temp_command);
 							command_index++;
-						}else {
-							switch(coord[1]) {
-								case 0 : {
-									printf("row = %d\n", coord[1]);
-									keyPad_queue_id = osMessageCreate(osMessageQ(keyPad_msg_queue), NULL);
-									setKeyPadMsgQueueId(keyPad_queue_id);
-									osMessagePut(keyPad_queue_id, (uint32_t)(command), osWaitForever);
-									ANGLE_FLAG = 1;
-									osDelay(140);
-									// Functionality of keypad when reading A, B, C, D
-								}; break;
-								case 1 : {
-									ANGLE_FLAG = 0;
-								}; break;
-								default : ANGLE_FLAG = 0;							
-							}
+						} else { // Keys A to D
+							state = setState(coord[1],state);
 						}
-					} else {
-						// Functionality of keypad when not reading
+					} else { // When not inputting values
+						if (coord[0] == 3) {
+							state = setState(coord[1],state);
+						}
 				}; break;
-				case 1 : if(counter == -1){
+				case 1 : if(counter == -1){// Start inputting pitch angle
 					reading = 1;
+					state = 2; // read keypad
 					counter++;
-				} else if (counter == 1){
+				} else if (counter == 1){ // Finish inputting roll angle
+					resetParameters(counter, command_index, command);
+					state = 1;
 					reading = 0;
-					counter = -1;
-					angle_index = 0;
-					memset(angle, '\0', sizeof(angle[0][0]) * 2 * 4);
-					command_index = 0;
-					for(uint8_t i = 0; i < 4; i++){
-						Decoding(-1, command[i]);
-					}
-				} else {
+					//Send acc
+				} else { // Finish inputting pitch angle, start inputting roll angle
 					angle_index = 0;
 					counter ++;
 				}; break;
 				case 2 : {// Reset everyting
-					reading = 0;
-					counter = -1;
+					resetParameters(counter, command_index, command);
 					memset(angle, '\0', sizeof(angle[0][0]) * 2 * 4);
-					number = -1;
-					angle_index = 0;
-					command_index = 0;
-					for(uint8_t i = 0; i < 4; i++){
-						Decoding(-1, command[i]);
-					}
 				}; break;			
 				default : printf("Angle[%d] = %s\n", counter, angle[counter]); 
 			}
+//			if (coord[0] == 3) {
+//				state = setState(coord[1],state);
+//			}
 			coord[0] = -1;
 			coord[1] = -1;
 			if(counter > -1)
 				printf("Angle[%d] = %s\n", counter, angle[counter]);
 		}
 	}
+}
+
+void resetParameters (int8_t counter, uint8_t command_index, char command[4][9]){
+			counter = -1;
+			angle_index = 0;
+			command_index = 0;
+			for(uint8_t i = 0; i < 4; i++){
+						Decoding(-1, command[i]);
+			}
+}
+
+uint32_t setState (uint8_t pos, uint32_t state) {
+		switch(pos) {
+				case 0 : return 1; break; // Display temperature
+				case 1 : return 2; break; // Display Keypad
+				case 2 : return 3; break; // Display accelerometer roll
+				case 3 : return 4; break; // Display accelerometer pitch
+				default : return state;	 // When no key is pressed, continue displaying previous state						
+		}	
 }
 
 /* Function: StartKeypadGPIO
@@ -226,6 +244,7 @@ uint8_t read_keypad(int8_t coord[2]){
 	int8_t col_index = -1;
 	int8_t row_index = -1;
 	uint8_t stat = 0;
+	uint16_t counter = 0;
 
 	while(col_index == -1) {
 		for(int8_t i = 0; i < 4; i++){
@@ -238,6 +257,10 @@ uint8_t read_keypad(int8_t coord[2]){
 					break;
 				}
 		}
+		if(counter == 500 && !reading) {
+			return stat;
+		}
+		counter ++;
 	}
 	
 	int16_t button_counter = 0;
@@ -316,4 +339,11 @@ void setKeyPadMsgQueueId(osMessageQId msg_Id){
 
 osMessageQId getKeyPadMsgQueueId(void){
 	return shared_KeyPadmsg_q_id;
+}
+void setStateMsgQueueId(osMessageQId msg_Id){
+	shared_Statemsg_q_id = msg_Id;
+}
+
+osMessageQId getStateMsgQueueId(void){
+	return shared_Statemsg_q_id;
 }

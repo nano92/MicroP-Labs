@@ -16,10 +16,14 @@
 #include "Thread_keypad.h"
 #include "timer.h"
 
+char LED_FLAG;
 extern void initializeLED_IO			(void);
 extern void start_Thread_LED			(void);
 extern void Thread_LED(void const *argument);
 extern osThreadId tid_Thread_LED;
+
+TIM_HandleTypeDef handle_time3;
+TIM_HandleTypeDef handle_tim4;
 
 /**
 	These lines are mandatory to make CMSIS-RTOS RTX work with te new Cube HAL
@@ -81,14 +85,15 @@ int main (void) {
 
 	/* User codes goes here*/
 	//char command[4][9] = {"11000000","11000000","11000000","11000000"};
-	//Init_TIM3_Config();
-  initializeLED_IO();                       /* Initialize LED GPIO Buttons    */
-  Start7SegmentDisplayGPIO();
+	Init_TIM3_Config(&handle_time3);
+	Init_TIM4_Config(&handle_tim4);
+  //initializeLED_IO();                       /* Initialize LED GPIO Buttons    */
 	
 	//start_Thread_LED();                       /* Create LED thread              */
+	start_Thread_keypad();
 	start_Thread_adc();
 	start_Thread_7segment();
-	start_Thread_keypad();
+	
 	
 	//while(1) {
   //DisplayTemperature(command,1);
@@ -97,4 +102,21 @@ int main (void) {
 	/* User codes ends here*/
   
 	osKernelStart();                          /* start thread execution         */
+	osDelay(osWaitForever);
+}
+
+void TIM3_IRQHandler(void){
+	HAL_TIM_IRQHandler(&handle_time3);
+}
+
+void EXTI0_IRQHandler(void){
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0); 	
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *handle_tim){
+	osSignalSet ((osThreadId)getADCThreadId(), 0x0001);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	osSignalSet ((osThreadId)getACCThreadId(), 0x0002);
 }

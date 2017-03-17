@@ -16,6 +16,7 @@ osThreadId tid_Thread_LED;                              // thread id
 osThreadDef(Thread_LED, osPriorityNormal, 1, 0);
 GPIO_InitTypeDef 				LED_configuration;
 
+extern char LED_FLAG;
 /*----------------------------------------------------------------------------
  *      Create the thread within RTOS context
  *---------------------------------------------------------------------------*/
@@ -32,9 +33,10 @@ int start_Thread_LED (void) {
 	void Thread_LED (void const *argument) {
 		
 		while(1){
-				osDelay(1000);
-				HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-			}
+			osSignalWait(0x0001, osWaitForever);
+			HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+				
+		}
 	}
 /*----------------------------------------------------------------------------
  *      Initialize the GPIO associated with the LED

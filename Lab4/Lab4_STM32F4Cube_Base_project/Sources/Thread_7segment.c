@@ -7,11 +7,10 @@
   ******************************************************************************
   */
 	
-#include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
-#include "stm32f4xx_hal.h"
 #include "Thread_7segment.h"
 #include "Thread_adc.h"
 #include "Thread_keypad.h"
+#include "Thread_accelerometer.h"
 
 void Thread_7segment (void const *argument);             // thread function
 osThreadId tid_Thread_7segement;                         // thread id
@@ -37,7 +36,6 @@ static uint8_t temp_counter = 0, celsius = 0, rise_edge = 0;
 int start_Thread_7segment (void) {
 
   tid_Thread_7segement = osThreadCreate(osThread(Thread_7segment ), NULL); // Start LED_Thread
-  printf("Thread ID = %d\n", (int)tid_Thread_7segement);
 	if (!tid_Thread_7segement) return(-1); 
   return(0);
 }
@@ -46,47 +44,72 @@ int start_Thread_7segment (void) {
  *      Thread  'LED_Thread': Toggles LED
  *---------------------------------------------------------------------------*/
 void Thread_7segment (void const *argument) {
+	 Start7SegmentDisplayGPIO();
 	char command[4][9];
 	memset(command, 0, sizeof(command[0][0]) * 9 * 4);
-	osEvent event_adc, event_alarm, event_keypad;
+	osEvent event_adc, event_alarm, event_keypad, event_acc_roll, event_acc_pitch, event_state; //event_state : comes from keypad
 	uint8_t alarm = 1;
+	uint16_t count = 0;
+	uint16_t time_delay = 100;
+	uint8_t state = 0;
 	while(1){
-		uint8_t alarm_delay = 160;
-		uint16_t count = 0;
+		uint16_t delay = 0;
 		
-		if(ANGLE_FLAG == 0){
-			event_adc = osMessageGet((osMessageQId)getADCMsgQueueId(), osWaitForever);
-			event_alarm = osMessageGet((osMessageQId)getAlarmMsgQueueId(), osWaitForever);
-			
-			if(event_adc.status == osEventMessage || event_alarm.status == osEventMessage){
-				alarm = (uint8_t)event_alarm.value.p;
-				alarm_delay = (alarm == 2) ? alarm_delay >> 2 : alarm_delay;
-				for(uint8_t i = 0; i < 4; i++){
-					strcpy(command[i],(char *)event_adc.value.p + i*9);
-					//printf("command from 7segment = %s\n", ((char *)event.value.p + i*9));
-				}	
-			}
-		}else if(ANGLE_FLAG == 1){
-			event_keypad = osMessageGet((osMessageQId)getKeyPadMsgQueueId(), osWaitForever);
-			if(event_keypad.status == osEventMessage){
+		event_state = osMessageGet((osMessageQId)getStateMsgQueueId(), osWaitForever);
+		event_adc = osMessageGet((osMessageQId)getADCMsgQueueId(), osWaitForever);
+		event_alarm = osMessageGet((osMessageQId)getAlarmMsgQueueId(), osWaitForever);
+		event_keypad = osMessageGet((osMessageQId)getKeyPadMsgQueueId(), osWaitForever);
+		//event_acc_roll = osMessageGet((osMessageQId)getRollACCMsgQueueId(), osWaitForever);
+		//event_acc_pitch = osMessageGet((osMessageQId)getPitchACCMsgQueueId(), osWaitForever);
+		
+		if(event_state.status == osEventMessage){
+			state = (uint8_t)event_state.value.p;
+		}
+		
+		if(event_alarm.status == osEventMessage){
+			alarm = (uint8_t)event_alarm.value.p;
+		}
+		
+		switch (state) {
+			case 2 : if(event_keypad.status == osEventMessage){		
 				for(uint8_t i = 0; i < 4; i++){
 					strcpy(command[i],(char *)event_keypad.value.p + i*9);
-				}	
+				}
+			};break;
+			case 3 : if(event_acc_roll.status == osEventMessage){		
+				for(uint8_t i = 0; i < 4; i++){
+					strcpy(command[i],(char *)event_acc_roll.value.p + i*9);
+				}
+			};break;
+			case 4 : if(event_acc_pitch.status == osEventMessage){		
+				for(uint8_t i = 0; i < 4; i++){
+					strcpy(command[i],(char *)event_acc_pitch.value.p + i*9);
+				}
+			};break;
+			default: if(event_adc.status == osEventMessage){		
+				for(uint8_t i = 0; i < 4; i++){
+					strcpy(command[i],(char *)event_adc.value.p + i*9);
+				}
+			};
+		}
+
+		while(delay < time_delay){
+			if(alarm == 2 ){
+				if (count == 1) {
+					turnOffDisplay();
+				} else if (count == 2) {
+					count = -1;
+					DisplayTemperature(command);
+				} else {
+					DisplayTemperature(command);
+				}
+			} else {
+				DisplayTemperature(command);
 			}
+			delay++;
 		}
-		while(count < alarm_delay){
-			DisplayTemperature(command);
-			count++;
-		}
-	}
-//		if(TEMP_ALARM){
-//			osDelay(1000);
-//		}
-//			while(count < 100){
-//				DisplayTemperature(command);
-//				count++;
-//		}
-	
+		count = (alarm == 2) ? count + 1 : 0;
+	}	
 }
 
 /* Function: Start7SegmentDisplayGPIO
@@ -150,16 +173,19 @@ void DisplayTemperature(char command[4][9]){
 void turnOffDisplay(void) {
 	
 	for(int8_t i = 0; i < 4; i++){
-		HAL_GPIO_WritePin(GPIOB, GPIOB_array[i], GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOB, GPIOB_array[i], GPIO_PIN_RESET);
 	}
 	for(int8_t n = 0; n < 4; n++) {
-		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_SET);
 		for(uint16_t i = 1400; i > 0; i--){
 			for(int8_t i = 7; i >= 0; i--){
-					HAL_GPIO_WritePin(GPIOD, GPIOD_array[i], GPIO_PIN_SET);
+					HAL_GPIO_WritePin(GPIOD, GPIOD_array[i], GPIO_PIN_RESET);
 			}
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
 		}	
-		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_RESET);
 	}
+}
+
+osThreadId get7SegementThreadId(void){
+	return tid_Thread_7segement;
 }

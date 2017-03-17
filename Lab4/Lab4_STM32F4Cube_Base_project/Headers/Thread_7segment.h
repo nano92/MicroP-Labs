@@ -8,6 +8,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_it.h"
+#include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -19,6 +20,7 @@
 /* USER CODE BEGIN Prototypes */
 int start_Thread_7segment (void);
 void Start7SegmentDisplayGPIO(void);
+osThreadId get7SegementThreadId(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

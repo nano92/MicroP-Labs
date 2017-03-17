@@ -13,5 +13,5 @@ extern char ANGLE_FLAG;
 /* USER CODE BEGIN Prototypes */
 int start_Thread_keypad (void);
 osMessageQId getKeyPadMsgQueueId(void);
-
+osMessageQId getStateMsgQueueId(void);
 #endif

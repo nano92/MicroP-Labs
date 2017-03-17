@@ -8,6 +8,7 @@
   */
 
 #include "Thread_adc.h"
+#include "Thread_7segment.h"
 #include "supporting_functions.h"
 
 void Thread_adc(void const *argument);             // thread function
@@ -62,7 +63,8 @@ void Thread_adc(void const *argument){
 	alarm_msg_queue_id = osMessageCreate(osMessageQ(alarm_msg_queue), NULL);
 	setAlarmMsgQueueId(alarm_msg_queue_id);
 	while(1){
-		osDelay(1000);
+		osSignalWait(0x0001, osWaitForever);
+		//osDelay(1000);
 		status = GetTempValue(&ADC1_Handle, &ADC_value);
 		data[0] = ADC_value;
 		ADC_value = filter(data);
@@ -224,7 +226,7 @@ float DegreeConverter(uint32_t ADC_value){
 	
 	//Set high temperature alarm after it gets calculated. Global variable
 	//temp_alarm is used in DisplayTemperature()
-	uint8_t alarm = (celsius > 31.0) ? 2 : 1;
+	uint8_t alarm = (celsius > 33.0) ? 2 : 1;
 	setTempAlarm(alarm);
 
 	//return (temp_flag == 0) ? celsius : farenheit;
@@ -266,4 +268,8 @@ void setADCMsgQueueId(osMessageQId msg_Id){
 
 osMessageQId getADCMsgQueueId(void){
 	return shared_ADCmsg_q_id;
+}
+
+osThreadId getADCThreadId(void){
+		return tid_Thread_adc;
 }

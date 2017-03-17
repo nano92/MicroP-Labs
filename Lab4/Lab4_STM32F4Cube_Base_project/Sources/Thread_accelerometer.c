@@ -14,7 +14,6 @@
 #include "supporting_functions.h"
 #include "lis3dsh.h"
 #include "Thread_accelerometer.h"
-#include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
 #include "stm32f4xx_hal.h"
 #include "timer.h"
 #include <math.h>
@@ -34,6 +33,8 @@ void setPitchACCMsgQueueId(osMessageQId msg_Id);
 osMessageQId getPitchACCMsgQueueId(void);
 void setRollACCMsgQueueId(osMessageQId msg_Id);
 osMessageQId getRollACCMsgQueueId(void);
+
+extern TIM_HandleTypeDef handle_tim4;
 
 static float ACCX_1[3] = {-0.00096545, -2.56184E-05,	8.70825E-06};
 static float ACCX_2[3] = {0.0000223103,	0.001024109,	-0.0000556414};
@@ -57,6 +58,7 @@ int start_Thread_accelerometer(void) {
 }
 
 void Thread_accelerometer(void const *argument) {
+	StartLEDGPIO();
 	Init_ACC();
 	float values[2];
 	float roll, pitch;
@@ -65,19 +67,21 @@ void Thread_accelerometer(void const *argument) {
 		readingACC(values);
 		roll = values[0];
 		pitch = values[1];
+		Set_LEDBrightness(roll, pitch);
 		if(counter == 33) {		
 			pitchACC_queue_id = osMessageCreate(osMessageQ(pitchACC_msg_queue), NULL);
 			rollACC_queue_id = osMessageCreate(osMessageQ(rollACC_msg_queue), NULL);
 			setPitchACCMsgQueueId(pitchACC_queue_id);
 			setRollACCMsgQueueId(rollACC_queue_id);
-			osMessagePut(pitchACC_queue_id, pitch, osWaitForever);
-			osMessagePut(rollACC_queue_id, roll, osWaitForever);
+			osMessagePut(pitchACC_queue_id, (uint32_t)pitch, osWaitForever);
+			osMessagePut(rollACC_queue_id, (uint32_t)roll, osWaitForever);
 			counter = 0;
 		}
 		
 	}
 	
 }
+
 
 /* Function : calibrate
  * Input    : float* acc

@@ -22,6 +22,7 @@
 int start_Thread_adc(void);
 osMessageQId getADCMsgQueueId(void);
 osMessageQId getAlarmMsgQueueId(void);
+osThreadId getADCThreadId(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
