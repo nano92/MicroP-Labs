@@ -12,7 +12,6 @@
 
 /* USER CODE END Includes */
 
-extern char TEMP_ALARM;
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

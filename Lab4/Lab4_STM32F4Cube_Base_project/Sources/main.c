@@ -13,6 +13,7 @@
 #include "RTE_Components.h"             // Component selection
 #include "Thread_7segment.h"								// Displays the temperature in the 4 digit 7 segment display
 #include "Thread_adc.h"
+#include "Thread_keypad.h"
 #include "timer.h"
 
 extern void initializeLED_IO			(void);
@@ -84,9 +85,11 @@ int main (void) {
   initializeLED_IO();                       /* Initialize LED GPIO Buttons    */
   Start7SegmentDisplayGPIO();
 	
-	start_Thread_LED();                       /* Create LED thread              */
-	start_Thread_7segment();
+	//start_Thread_LED();                       /* Create LED thread              */
 	start_Thread_adc();
+	start_Thread_7segment();
+	start_Thread_keypad();
+	
 	//while(1) {
   //DisplayTemperature(command,1);
 		

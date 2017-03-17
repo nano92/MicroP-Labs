@@ -8,6 +8,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_it.h"
+#include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
+#include "stm32f4xx_hal.h"
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -18,6 +20,8 @@
 
 /* USER CODE BEGIN Prototypes */
 int start_Thread_adc(void);
+osMessageQId getADCMsgQueueId(void);
+osMessageQId getAlarmMsgQueueId(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

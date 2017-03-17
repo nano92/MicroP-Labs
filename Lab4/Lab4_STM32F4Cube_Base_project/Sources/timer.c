@@ -29,16 +29,16 @@ HAL_StatusTypeDef Init_TIM3_Config(void){
 	
 	__TIM3_CLK_ENABLE();
 	
-	init_tim.Prescaler = 117; 
+	init_tim.Prescaler = 420; 
 	init_tim.CounterMode = TIM_COUNTERMODE_UP;
 	/*       
     TIM_Period = timer_tick_frequency / PWM_frequency - 1
     
     In our case, for 100 Hz PWM_frequency, set Period to
     
-    TIM_Period = 42000000 / 100 - 1 = 839999 = (prescalar + 1)*period
+    TIM_Period = 42000000 / 100 - 1 = 419999 = (prescalar + 1)*period
 */
-	init_tim.Period = 360;
+	init_tim.Period = 1000;
 	init_tim.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	init_tim.RepetitionCounter = 0;
 	
@@ -56,7 +56,7 @@ HAL_StatusTypeDef Init_TIM3_Config(void){
 		printf("HAL_TIM_Base_Init status: %d\n", status);
 		return status;
 	}
-	Init_NVIC_Interrupt(TIM3_IRQn, 0, 2);
+	//Init_NVIC_Interrupt(TIM3_IRQn, 0, 2);
 }
 
 /* Function : Init_TIM4_Config
