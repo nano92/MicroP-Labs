@@ -26,6 +26,9 @@ extern osThreadId tid_Thread_LED;
 TIM_HandleTypeDef handle_time3;
 TIM_HandleTypeDef handle_tim4;
 
+osMutexDef(uart_state_mutex);
+osMutexId(uart_state_mutex_id);
+
 /**
 	These lines are mandatory to make CMSIS-RTOS RTX work with te new Cube HAL
 */
@@ -86,15 +89,15 @@ int main (void) {
 
 	/* User codes goes here*/
 	//char command[4][9] = {"11000000","11000000","11000000","11000000"};
-	//Init_TIM3_Config(&handle_time3);
-	//Init_TIM4_Config(&handle_tim4);
-  //initializeLED_IO();                       /* Initialize LED GPIO Buttons    */
-	
+	Init_TIM3_Config(&handle_time3);
+	Init_TIM4_Config(&handle_tim4);
+  //Start mutex				                       /* Initialize LED GPIO Buttons    */
+	uart_state_mutex_id = osMutexCreate(osMutex(uart_state_mutex));
 	//start_Thread_LED();                       /* Create LED thread              */
 	start_Thread_keypad();
-	//start_Thread_adc();
-	//start_Thread_7segment();
-	//start_Thread_accelerometer();
+	start_Thread_adc();
+	start_Thread_7segment();
+	start_Thread_accelerometer();
 	
 	//while(1) {
   //DisplayTemperature(command,1);

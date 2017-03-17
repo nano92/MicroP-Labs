@@ -8,6 +8,8 @@
   */
 #include "Thread_keypad.h"
 
+extern const osMutexId uart_state_mutex_id;
+
 void Thread_keypad (void const *argument); 
 osThreadId tid_Thread_keypad;                         // thread id
 osThreadDef(Thread_keypad, osPriorityNormal, 1, 0);
@@ -117,6 +119,7 @@ void Thread_keypad (void const *argument) {
 						}
 				}; break;
 				case 1 : if(counter == -1){// Start inputting pitch angle
+					osMutexWait(uart_state_mutex_id, 10);
 					reading = 1;
 					state = 2; // read keypad
 					counter++;
@@ -127,6 +130,7 @@ void Thread_keypad (void const *argument) {
 					resetParameters(counter, command_index, command);
 					state = 1;
 					reading = 0;
+					osMutexRelease(uart_state_mutex_id);
 					//Send acc
 				} else { // Finish inputting pitch angle, start inputting roll angle
 					pitch_angle = atoi(angle[counter]);
