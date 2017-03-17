@@ -11,6 +11,8 @@
 #include "Thread_7segment.h"
 #include "supporting_functions.h"
 
+extern const osMutexId uart_state_mutex_id;
+
 void Thread_adc(void const *argument);             // thread function
 osThreadId tid_Thread_adc;                         // thread id
 osThreadDef(Thread_adc, osPriorityNormal, 1, 0);
@@ -70,9 +72,11 @@ void Thread_adc(void const *argument){
 		ADC_value = filter(data);
 		if(status == HAL_OK){
 			CommandGenerator(ADC_value, command);
+			osMutexWait(uart_state_mutex_id, 12);
 			//printf("command from adc = %s %s %s %s\n", command[0],command[1], command[2], command[3]);
 			osMessagePut(adc_msg_queue_id, (uint32_t)(command), osWaitForever);
 			osMessagePut(alarm_msg_queue_id, (uint32_t)getTempAlarm(), osWaitForever);
+			osMutexRelease(uart_state_mutex_id);
 		}
 	}
 }

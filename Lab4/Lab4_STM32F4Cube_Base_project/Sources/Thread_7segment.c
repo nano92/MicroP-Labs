@@ -12,6 +12,8 @@
 #include "Thread_keypad.h"
 #include "Thread_accelerometer.h"
 
+osMutexId osMutexCreate (const osMutexDef_t *mutex_def);
+
 void Thread_7segment (void const *argument);             // thread function
 osThreadId tid_Thread_7segement;                         // thread id
 osThreadDef(Thread_7segment, osPriorityNormal, 1, 0);
@@ -21,6 +23,7 @@ static void turnOffDisplay(void);
 GPIO_InitTypeDef GPIOD_init;
 GPIO_InitTypeDef GPIOB_init;
 GPIO_InitTypeDef GPIOA_init;
+
 //char command[4][9] = {"11000000","11000000","11000000","11000000"};
 
 // GPIOs for the 7 segments
