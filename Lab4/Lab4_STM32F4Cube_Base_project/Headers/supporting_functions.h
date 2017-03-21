@@ -2,8 +2,8 @@
   ******************************************************************************
   * File Name          : supporting_functions.h
   * Description        : User defined common functions that can be used across projects
-	* Author						 : Ashraf Suyyagh
-	* Version            : 1.0.0
+	* Author						 : Luis Gallet, Juan Carlos Borges
+	* Version            : 2.0.0
 	* Date							 : January 14th, 2016
   ******************************************************************************
   */

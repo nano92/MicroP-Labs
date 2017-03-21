@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * File Name          : accelerometer.h
+  * File Name          : Thread_accelerometer.h
   * Description        : Reading of the accelerometer values
 	* Authors						 : Juan Carlos Borges, Luis Gallet
   * Group              : 10	

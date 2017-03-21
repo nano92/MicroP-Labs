@@ -1,11 +1,12 @@
 /**
   ******************************************************************************
   * File Name          : timer.c
-  * Description        : Init Timer in PWM mode and handle its pulse
+  * Description        : Init TIM4 in PWM mode, init TIM3 in interrupt mode and 
+	*                      handle its pulse
 	* Authors						 : Luis Gallet
   * Group              : 10	
-	* Version            : 1.0.0
-	* Date							 : March 10th, 2017
+	* Version            : 2.0.0
+	* Date							 : March 20th, 2017
   ******************************************************************************
   */
 	
@@ -17,10 +18,10 @@ static HAL_StatusTypeDef Set_LED_Pulse(int16_t angle, int16_t angle_difference,
 
 TIM_OC_InitTypeDef init_OC_tim;
 
-/* Function : Init_TIM1_Config
+/* Function : Init_TIM3_Config
  * Input    : None
  * Returns	: HAL status 
- * Description: Initialize TIM1 timer in Interrupt mode
+ * Description: Initialize TIM3 timer in Interrupt mode
 */
 HAL_StatusTypeDef Init_TIM3_Config(TIM_HandleTypeDef *handle_tim3){
 	TIM_Base_InitTypeDef init_tim;

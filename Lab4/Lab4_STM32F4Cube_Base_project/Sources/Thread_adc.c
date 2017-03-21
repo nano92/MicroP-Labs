@@ -1,9 +1,11 @@
-/*******************************************************************************
-  * @file    Thread_adc.c
-  * @author  Luis Gallet
-	* @version V1.0.0
-  * @date    15-March-2016
-  * @brief   	
+/**
+  ******************************************************************************
+  * File Name          : Thread_adc.c
+  * Description        : Retrieve, filter, transform and map adc values
+	* Authors						 : Juan Carlos Borges, Luis Gallet
+  * Group              : 10	
+	* Version            : 1.0.0
+	* Date							 : March 20th, 2017
   ******************************************************************************
   */
 
@@ -57,23 +59,28 @@ int start_Thread_adc(void){
 void Thread_adc(void const *argument){
 	HAL_StatusTypeDef status;
 	StartADCHandle(&ADC1_Handle);
+	
 	uint32_t ADC_value = 0;
 	uint32_t data[5] = {0,0,0,0,0};
 	char command[4][9];
+	
 	adc_msg_queue_id = osMessageCreate(osMessageQ(adc_msg_queue), NULL);
 	setADCMsgQueueId(adc_msg_queue_id);
+	
 	alarm_msg_queue_id = osMessageCreate(osMessageQ(alarm_msg_queue), NULL);
 	setAlarmMsgQueueId(alarm_msg_queue_id);
+	
 	while(1){
 		osSignalWait(0x0001, osWaitForever);
-		//osDelay(1000);
+		
 		status = GetTempValue(&ADC1_Handle, &ADC_value);
 		data[0] = ADC_value;
 		ADC_value = filter(data);
 		if(status == HAL_OK){
 			CommandGenerator(ADC_value, command);
+			
 			osMutexWait(uart_state_mutex_id, 12);
-			//printf("command from adc = %s %s %s %s\n", command[0],command[1], command[2], command[3]);
+	
 			osMessagePut(adc_msg_queue_id, (uint32_t)(command), osWaitForever);
 			osMessagePut(alarm_msg_queue_id, (uint32_t)getTempAlarm(), osWaitForever);
 			osMutexRelease(uart_state_mutex_id);
@@ -141,7 +148,6 @@ HAL_StatusTypeDef StartADCHandle(ADC_HandleTypeDef *ADC1_Handle){
  * function may use this value.
  */
 HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef* ADC1_Handle, uint32_t* ADC_value){
-	//uint32_t temp_value = 0;
 	HAL_StatusTypeDef status;
 		
 	status = HAL_ADC_Start(ADC1_Handle);
@@ -157,11 +163,9 @@ HAL_StatusTypeDef GetTempValue(ADC_HandleTypeDef* ADC1_Handle, uint32_t* ADC_val
 	}
 	
 	*ADC_value = HAL_ADC_GetValue(ADC1_Handle);
-	//printf("ADC temperature value: %u\n", *ADC_value);
 	
 	status = HAL_ADC_Stop(ADC1_Handle);
 	if(status != HAL_OK){
-		//printf("HAL_ADC_Stop status: %d\n", status);
 		return status;
 	}
 	
@@ -249,31 +253,59 @@ uint32_t filter(uint32_t data[5]){
 	}
 	return filter;
 }
-
+/* Function : setTempAlarm
+ * Input    : uint8_t alarm
+ * Returns  : none
+ * Description : Sets alarm
+ */
 void setTempAlarm(uint8_t alarm){
 	temp_alarm = alarm;
 }
-
+/* Function : getTempAlarm
+ * Input    : none
+ * Returns  : uint8_t
+ * Description : Returns alarm
+ */
 uint8_t getTempAlarm(void){
 	return temp_alarm;
 }
-
+/* Function : setAlarmMsgQueueId
+ * Input    : osMessageQId msg_Id
+ * Returns  : none
+ * Description : set alarm message queue Id
+ */
 void setAlarmMsgQueueId(osMessageQId msg_Id){
 	shared_alarm_msg_q_id = msg_Id;
 }
-
+/* Function : getAlarmMsgQueueId
+ * Input    : none
+ * Returns  : osMessageQId
+ * Description : returns alarm message queue Id
+ */
 osMessageQId getAlarmMsgQueueId(void){
 	return shared_alarm_msg_q_id;
 }
-
+/* Function : setADCMsgQueueId
+ * Input    : osMessageQId msg_Id
+ * Returns  : none
+ * Description : set adc message queue Id
+ */
 void setADCMsgQueueId(osMessageQId msg_Id){
 	shared_ADCmsg_q_id = msg_Id;
 }
-
+/* Function : getADCMsgQueueId
+ * Input    : none
+ * Returns  : osMessageQId
+ * Description : returns adc message queue Id
+ */
 osMessageQId getADCMsgQueueId(void){
 	return shared_ADCmsg_q_id;
 }
-
+/* Function : getADCThreadId
+ * Input    : none
+ * Returns  : osThreadId
+ * Description : returns adc thread Id
+ */
 osThreadId getADCThreadId(void){
 		return tid_Thread_adc;
 }

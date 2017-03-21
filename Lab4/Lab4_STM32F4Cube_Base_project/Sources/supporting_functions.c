@@ -4,8 +4,8 @@
   * Description        : User defined common functions that can be used across projects
 	* Author						 : Juan Carlos Borges, Luis Gallet
   * Group              : 10	
-	* Version            : 2.0.0
-	* Date							 : March 10th, 2017
+	* Version            : 3.0.0
+	* Date							 : March 20th, 2017
   ******************************************************************************
   */
 #include "supporting_functions.h"

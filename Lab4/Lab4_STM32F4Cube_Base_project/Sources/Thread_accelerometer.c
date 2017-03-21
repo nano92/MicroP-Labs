@@ -1,12 +1,12 @@
 /**
   ******************************************************************************
-  * File Name          : accelerometer.c
+  * File Name          : Thread_accelerometer.c
   * Description        : Reading, filtering and mapping of the accelerometer 
 	*											 values
 	* Authors						 : Juan Carlos Borges, Luis Gallet
   * Group              : 10	
 	* Version            : 1.0.0
-	* Date							 : March 10th, 2017
+	* Date							 : March 20th, 2017
   ******************************************************************************
   */
 	
@@ -189,7 +189,8 @@ void InitAccGPIO(void){
 	HAL_GPIO_Init(GPIOE, &GPIO_Acc);
 }
 /* Function: StartLEDGPIO
- * Description: Initialises the GPIO pins responsible for the 4 LED used for the temperature alarm
+ * Description: Initialises the GPIO pins responsible to show the difference 
+ * the target angles and the ones measure from the accelerometer
  */
 void StartLEDGPIO(void){
 	__HAL_RCC_GPIOD_CLK_ENABLE();
@@ -201,21 +202,33 @@ void StartLEDGPIO(void){
 	
 	HAL_GPIO_Init(GPIOD, &GPIOLED_init);
 }
+/* Function: setPitchACCMsgQueueId
+ * Description: Saves pitch queue ID
+ */
 void setPitchACCMsgQueueId(osMessageQId msg_Id){
 	shared_pitchACCmsg_q_id = msg_Id;
 }
-
+/* Function: getPitchACCMsgQueueId
+ * Description: Returns pitch queue ID
+ */
 osMessageQId getPitchACCMsgQueueId(void){
 	return shared_pitchACCmsg_q_id;
 }
+/* Function: setRollACCMsgQueueId
+ * Description: Saves roll queue ID
+ */
 void setRollACCMsgQueueId(osMessageQId msg_Id){
 	shared_rollACCmsg_q_id = msg_Id;
 }
-
+/* Function: getRollACCMsgQueueId
+ * Description: Returns roll queue ID
+ */
 osMessageQId getRollACCMsgQueueId(void){
 	return shared_rollACCmsg_q_id;
 }
-
+/* Function: getACCThreadId
+ * Description: Returns accelerometer thread ID
+ */
 osThreadId getACCThreadId(void){
 	return tid_Thread_accelerometer;
 }

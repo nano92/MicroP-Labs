@@ -1,11 +1,14 @@
-/*******************************************************************************
-  * @file    Thread_keypad.c
-  * @author  Juan Carlos Borges
-	* @version V1.0.0
-  * @date    16-March-2016
-  * @brief   	
+/**
+  ******************************************************************************
+  * File Name          : Thread_keypad.c
+  * Description        : Read keypad values and return number value
+	* Authors						 : Juan Carlos Borges, Luis Gallet
+  * Group              : 10	
+	* Version            : 1.0.0
+	* Date							 : March 20th, 2017
   ******************************************************************************
   */
+
 #include "Thread_keypad.h"
 
 extern const osMutexId uart_state_mutex_id;
@@ -155,7 +158,9 @@ void Thread_keypad (void const *argument) {
 		}
 	}
 }
-
+/* Function: resetParameters
+ * Description: Resets counter, command index and command to its initial values
+ */
 void resetParameters (int8_t counter, uint8_t command_index, char command[4][9]){
 			counter = -1;
 			angle_index = 0;
@@ -164,7 +169,9 @@ void resetParameters (int8_t counter, uint8_t command_index, char command[4][9])
 						Decoding(-1, command[i]);
 			}
 }
-
+/* Function: setState
+ * Description: set state depending on key pressed
+ */
 uint32_t setState (uint8_t pos, uint32_t state) {
 		switch(pos) {
 				case 0 : return 1; break; // Display temperature
@@ -305,7 +312,6 @@ uint8_t read_keypad(int8_t coord[2]){
 	
 	coord[0] = col_index;
 	coord[1] = row_index;
-	//KeyBouncingDelay(GPIOD, Col[col_index], GPIO_PIN_RESET, coord, rise_edge, stat);
 	
 	if(col_index == 2 && row_index == 3){
 		return 1;
@@ -345,17 +351,35 @@ char mapKeypad(int8_t column, int8_t row) {
 		default : return NULL;
 	}		
 }
+/* Function : setKeyPadMsgQueueId
+ * Input    : none
+ * Returns  : osMessageQId
+ * Description : sets keypad message queue Id
+ */
 void setKeyPadMsgQueueId(osMessageQId msg_Id){
 	shared_KeyPadmsg_q_id = msg_Id;
 }
-
+/* Function : getKeyPadMsgQueueId
+ * Input    : none
+ * Returns  : osMessageQId
+ * Description : returns keypad message queue Id
+ */
 osMessageQId getKeyPadMsgQueueId(void){
 	return shared_KeyPadmsg_q_id;
 }
+/* Function : setStateMsgQueueId
+ * Input    : none
+ * Returns  : osMessageQId
+ * Description : sets state message queue Id
+ */
 void setStateMsgQueueId(osMessageQId msg_Id){
 	shared_Statemsg_q_id = msg_Id;
 }
-
+/* Function : getStateMsgQueueId
+ * Input    : none
+ * Returns  : osMessageQId
+ * Description : returns state message queue Id
+ */
 osMessageQId getStateMsgQueueId(void){
 	return shared_Statemsg_q_id;
 }

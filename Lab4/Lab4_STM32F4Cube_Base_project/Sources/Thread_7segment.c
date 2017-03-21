@@ -1,9 +1,11 @@
-/*******************************************************************************
-  * @file    Thread_7segment.c
-  * @author  Luis Gallet
-	* @version V1.0.0
-  * @date    15-March-2016
-  * @brief   	
+/**
+  ******************************************************************************
+  * File Name          : Thread_7segment.c
+  * Description        : Initialize 7-segment GPIOs and display functions
+	* Authors						 : Juan Carlos Borges, Luis Gallet
+  * Group              : 10	
+	* Version            : 1.0.0
+	* Date							 : March 20th, 2017
   ******************************************************************************
   */
 	
@@ -24,7 +26,6 @@ GPIO_InitTypeDef GPIOD_init;
 GPIO_InitTypeDef GPIOB_init;
 GPIO_InitTypeDef GPIOA_init;
 
-//char command[4][9] = {"11000000","11000000","11000000","11000000"};
 
 // GPIOs for the 7 segments
 static const uint16_t GPIOD_array[8] = {GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, 
@@ -47,14 +48,18 @@ int start_Thread_7segment (void) {
  *      Thread  'LED_Thread': Toggles LED
  *---------------------------------------------------------------------------*/
 void Thread_7segment (void const *argument) {
-	 Start7SegmentDisplayGPIO();
+	Start7SegmentDisplayGPIO();
+	
 	char command[4][9];
 	memset(command, 0, sizeof(command[0][0]) * 9 * 4);
+	
 	osEvent event_adc, event_alarm, event_keypad, event_acc_roll, event_acc_pitch, event_state; //event_state : comes from keypad
+	
 	uint8_t alarm = 1;
 	uint16_t count = 0;
 	uint16_t time_delay = 100;
 	uint8_t state = 0;
+	
 	while(1){
 		uint16_t delay = 0;
 		
@@ -143,8 +148,8 @@ void Start7SegmentDisplayGPIO(void){
 
 /* Function: DisplayTemperature
  * Input   : char command[4][9], char temp_alarm
- * Description: function in charge of displaying the commands through the 4 digit 7 segment display and displaying the LED alarm signal 
- * ones temp_alarm is high.
+ * Description: function in charge of displaying the commands through the 
+ * 4 digit 7 segment display and displaying 
  */
 void DisplayTemperature(char command[4][9]){	
 	// Displaying the command in 7 segment display
@@ -166,15 +171,15 @@ void DisplayTemperature(char command[4][9]){
 				}
 			}
 		}	
-		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_RESET);		//printf("\n");
-		/*if(temp_alarm){
-			//turnOffDisplay();
-		}*/
+		HAL_GPIO_WritePin(GPIOB, GPIOB_array[n], GPIO_PIN_RESET);
 	}
 }
 
+/* Function: turnOffDisplay
+ * Description: Enables the display to show the data at a slower rate than usual
+ * to make it blink
+ */
 void turnOffDisplay(void) {
-	
 	for(int8_t i = 0; i < 4; i++){
 		HAL_GPIO_WritePin(GPIOB, GPIOB_array[i], GPIO_PIN_RESET);
 	}

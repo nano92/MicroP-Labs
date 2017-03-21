@@ -1,10 +1,9 @@
 /*******************************************************************************
   * @file    main.c
-  * @author  Ashraf Suyyagh
+  * @author  Luis Gallet, Juan Carlos Borges
 	* @version V1.2.0
-  * @date    17-January-2016
-  * @brief   This file demonstrates flasing one LED at an interval of one second
-	*          RTX based using CMSIS-RTOS 
+  * @date    20-March-2017
+  * @brief   Starts all used timers and threads
   ******************************************************************************
   */
 
@@ -88,21 +87,17 @@ int main (void) {
   SystemClock_Config();                     /* Configure the System Clock     */
 
 	/* User codes goes here*/
-	//char command[4][9] = {"11000000","11000000","11000000","11000000"};
+	
 	Init_TIM3_Config(&handle_time3);
 	Init_TIM4_Config(&handle_tim4);
-  //Start mutex				                       /* Initialize LED GPIO Buttons    */
+  //Start mutex				                      
 	uart_state_mutex_id = osMutexCreate(osMutex(uart_state_mutex));
-	//start_Thread_LED();                       /* Create LED thread              */
+	//start_Thread_LED();                       
 	start_Thread_keypad();
 	start_Thread_adc();
 	start_Thread_7segment();
 	start_Thread_accelerometer();
 	
-	//while(1) {
-  //DisplayTemperature(command,1);
-		
-	//}
 	/* User codes ends here*/
   
 	osKernelStart();                          /* start thread execution         */
@@ -118,9 +113,11 @@ void EXTI0_IRQHandler(void){
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *handle_tim){
+	//Signal to Thread_ADC every 100Hz to get ADC values and process them
 	osSignalSet ((osThreadId)getADCThreadId(), 0x0001);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	//Signal to read values from ACC
 	osSignalSet ((osThreadId)getACCThreadId(), 0x0002);
 }
